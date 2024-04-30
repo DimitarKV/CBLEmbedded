@@ -11,7 +11,7 @@ public class ConveyorBelt : MonoBehaviour
 
     void Start()
     {
-
+        Time.timeScale = 1;
     }
 
     void Update()
