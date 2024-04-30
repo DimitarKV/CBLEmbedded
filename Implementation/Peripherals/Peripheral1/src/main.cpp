@@ -23,7 +23,7 @@ void setup()
 {
   lcd.init(); // initialize the lcd
   lcd.backlight();
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 // Put character from serial in the buffer if available and return true if CRLF detected (Command mode) of if in Bulk read mode
