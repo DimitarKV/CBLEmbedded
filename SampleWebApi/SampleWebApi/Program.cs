@@ -20,6 +20,7 @@ if (app.Environment.IsDevelopment())
 }
 
 var sp = app.Services.GetService<ISerialCommunication>();
+sp.Initialize(builder.Configuration["SerialPort:Port"], int.Parse(builder.Configuration["SerialPort:Baudrate"]));
 sp.Open();
 
 app.UseHttpsRedirection();

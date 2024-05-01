@@ -9,12 +9,17 @@ public class SerialCommunication : ISerialCommunication
 
     public SerialCommunication()
     {
-        Sp = new SerialPort("COM5", 115200, Parity.None, 8, StopBits.One);
+    }
+
+    public void Initialize(string port, int baudrate)
+    {
+        Sp = new SerialPort(port, baudrate, Parity.None, 8, StopBits.One);
     }
 
     public void Open()
     {
         Sp.Open();
+        Console.WriteLine("Serial port open!");
     }
 
     public void Close()
