@@ -1,4 +1,4 @@
-﻿namespace SampleWebApi;
+﻿namespace SimulationTransferServer;
 
 public class SyncAllDTO
 {

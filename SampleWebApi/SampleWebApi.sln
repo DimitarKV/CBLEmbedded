@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleWebApi", "SampleWebApi\SampleWebApi.csproj", "{BC689474-2A1A-47F1-B077-DBE188ED11C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimulationTransferServer", "SimulationTransferServer\SimulationTransferServer.csproj", "{BC689474-2A1A-47F1-B077-DBE188ED11C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

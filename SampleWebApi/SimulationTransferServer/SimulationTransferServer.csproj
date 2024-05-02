@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
       <UserSecretsId>6d4eb37d-ff49-497f-ab2d-d955561ad71c</UserSecretsId>
+      <RootNamespace>SimulationTransferServer</RootNamespace>
   </PropertyGroup>
 
     <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using System.IO.Ports;
 
-namespace SampleWebApi.Services.Interfaces;
+namespace SimulationTransferServer.Services.Interfaces;
 
 public interface ISerialCommunication
 {

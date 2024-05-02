@@ -1,5 +1,5 @@
-using SampleWebApi;
-using SampleWebApi.Services.Interfaces;
+using SimulationTransferServer;
+using SimulationTransferServer.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +22,13 @@ if (app.Environment.IsDevelopment())
 var sp = app.Services.GetService<ISerialCommunication>();
 sp.Initialize(builder.Configuration["SerialPort:Port"], int.Parse(builder.Configuration["SerialPort:Baudrate"]));
 sp.Open();
+//Purge receive buffer of Arduino after opening since sp.Open() sends "dddd" after initialization, which messes up Arduino logic
+sp.GetSerialPort().Write(":?:?aAbBcC\r\n");
+
+var peripheral = app.Services.GetService<IPeripheralCommunication>();
+peripheral.WriteToDisplay("Welcome to our sweet robot, feel free to test it's abilities!");
 
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
+sp.Close();

@@ -1,86 +1,45 @@
 #include <Arduino.h>
+#include <StandardCplusplus.h>
+#include <iostream>
+#include <string>
+#include <vector>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
+#include <communication/communication.h>
 
-LiquidCrystal_I2C lcd(0x27, 20, 4); // LCD Address, row, cols
-
-enum ReadMode
-{
-  COMMAND,
-  PROCESSING,
-  PROCESSING_BULK
-};
-
-char serialBuffer[256];
-int serialBufferIndex = 0;
-ReadMode serialCommandMode = COMMAND;
-void (*serialProcessor)();
-int serialBytesToRead = 0;
-
-byte pixelR, pixelG, pixelB;
+int displayCols = 16, displayRows = 2;
+LiquidCrystal_I2C lcd(0x27, displayCols, displayRows);
+Communication communication;
 
 void setup()
 {
-  lcd.init(); // initialize the lcd
+  lcd.init();
   lcd.backlight();
+
+  communication.addProcessor(0, )
+
   Serial.begin(115200);
 }
 
-// Put character from serial in the buffer if available and return true if CRLF detected (Command mode) of if in Bulk read mode
-bool serialRead()
-{
-  if (Serial.available())
-  {
-    serialBuffer[serialBufferIndex] = Serial.read();
-    serialBufferIndex++;
-    if (serialBufferIndex > 1 && serialBuffer[serialBufferIndex - 2] == '\r' && serialBuffer[serialBufferIndex - 1] == '\n')
-    {
-      serialBuffer[serialBufferIndex - 2] = '\0';
-      return true;
-    }
-  }
-  return false;
-}
-
-void writeToDisplay(String text)
+void writeToDisplayNoScrolling(std::string text)
 {
   lcd.clear();
-  lcd.print(text.c_str());
+  if(text.length() <= 16) {
+    lcd.print(text.c_str());
+  }
+  else {
+    lcd.print(text.substr(0, 16).c_str());
+    lcd.setCursor(0, 1);
+    lcd.print(text.substr(16, 16).c_str());
+  }
 }
 
-// Handle collected serial commands from the buffer.
-// We define a command name from the first three
-// letters in the command, any consequent letters represent parameters.
-void handleSerial()
+void writeToDisplayScrolling(std::string text)
 {
-  // Serial.println(serialBuffer);
-  String command = String(serialBuffer);
-  // Serial.println(command);
-  if (command.substring(0, 3) == "WTD")
-  {
-    writeToDisplay(command.substring(3));
-    Serial.println(command.substring(3));
-  }
-  else if (command.substring(0, 3) == "BLK")
-  {
-    
-  }
-  serialBufferIndex = 0;
+  lcd.clear();
 }
 
 void loop()
 {
-  if (serialRead())
-  {
-    handleSerial();
-  }
-
-  // pixels.setPixelColor(0, pixels.Color(pixelR, pixelG, pixelB));
-
-  // if (Serial.available()) {
-  //   lcd.clear();
-  //   while (Serial.available() > 0) {
-  //     lcd.write(Serial.read());
-  //   }
-  // }
+  communication.tick();
 }
