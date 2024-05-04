@@ -2,70 +2,138 @@
 
 namespace SimulationTransferServer.Services;
 
-public class PeripheralCommunication(ISerialCommunication communication, ILogger<PeripheralCommunication> logger) : IPeripheralCommunication
+public class PeripheralCommunication : IPeripheralCommunication
 {
-    private int CalculateLrc(byte function, byte[] input)
+    private readonly ISerialCommunication _communication;
+    private readonly ILogger<PeripheralCommunication> _logger;
+    private int _retries;
+    private int _readTimeout;
+
+    public PeripheralCommunication(ISerialCommunication communication, ILogger<PeripheralCommunication> logger)
     {
-        int calculatedLrc = 0;
-        calculatedLrc = (calculatedLrc + function) & 0xFF;
-        foreach (char b in input)
+        _communication = communication;
+        _logger = logger;
+
+        Initialize("COM5", 115200);
+        SetRetries(3);
+        _readTimeout = 2000;
+    }
+
+    public void Initialize(string port, int baudRate)
+    {
+        _communication.Initialize(port, baudRate);
+    }
+
+    public void Open()
+    {
+        _communication.Open();
+        _communication.GetSerialPort().BaseStream.ReadTimeout = _readTimeout;
+        _logger.LogInformation("Communication started");
+    }
+
+    public async Task WriteToDisplay(string text)
+    {
+        var success = await SendModbusMessage(0, text.Select(l => (byte)l).ToArray());
+        if (success)
+            _logger.LogInformation("Successfully sent packet!");
+        else
+            _logger.LogInformation("Unsuccessful packet!");
+    }
+
+    public async Task Close()
+    {
+        await SendModbusMessage(1, new byte[] { });
+        _communication.Close();
+        _logger.LogInformation("Communication closed");
+    }
+
+    public void SetRetries(int retries)
+    {
+        _retries = retries;
+    }
+
+    public void SetReadTimeout(int readTimeout)
+    {
+        _readTimeout = readTimeout;
+    }
+
+    private async Task<int> ReadAsyncWithTimeout(byte[] buffer, int offset, int length)
+    {
+        Task<int> result = _communication.GetSerialPort().BaseStream.ReadAsync(buffer, offset, length);
+
+        await Task.WhenAny(result, Task.Delay(_readTimeout));
+
+        if (!result.IsCompleted)
         {
-            calculatedLrc = (calculatedLrc + b) & 0xFF;
+            throw new TimeoutException();
         }
 
-        calculatedLrc = (((calculatedLrc ^ 0xFF) + 1) & 0xFF);
+        return await result;
+    }
+
+    private async Task<string> ReadCrLfLineFromStreamAsync(Stream stream)
+    {
+        var data = "";
+
+        while (true)
+        {
+            var c = new byte[1];
+
+            await ReadAsyncWithTimeout(c, 0, 1);
+
+            data += (char)c[0];
+            if (data.Length > 1 && data[^2] == '\r' && data[^1] == '\n') return data.Substring(0, data.Length - 2);
+        }
+    }
+
+    private int CalculateLrc(byte function, byte[] input)
+    {
+        var calculatedLrc = 0;
+        calculatedLrc = (calculatedLrc + function) & 0xFF;
+        foreach (char b in input) calculatedLrc = (calculatedLrc + b) & 0xFF;
+
+        calculatedLrc = ((calculatedLrc ^ 0xFF) + 1) & 0xFF;
         return calculatedLrc;
     }
 
     private string ConvertToDataChunk(byte[] data)
     {
-        string chunk = "";
-        foreach (byte b in data)
-        {
-            chunk += ((int)b).ToString("x2");
-        }
+        var chunk = "";
+        foreach (var b in data) chunk += ((int)b).ToString("x2");
 
         return chunk;
     }
 
-    private bool SendModbusMessage(int function, byte[] data)
+    private async Task<bool> SendModbusMessage(int function, byte[] data)
     {
-        string start = ":";
-        string functionHex = function.ToString("x2");
-        string dataChunkHex = ConvertToDataChunk(data);
-        string lrcHex = CalculateLrc((byte)function, data).ToString("x2");
-        string end = "\r\n";
-        communication.GetSerialPort().Write(start + functionHex + dataChunkHex + lrcHex + end);
-        // TODO: Add ACK/NACK
-        return true;
-    }
+        var start = ":";
+        var functionHex = function.ToString("x2");
+        var dataChunkHex = ConvertToDataChunk(data);
+        var lrcHex = CalculateLrc((byte)function, data).ToString("x2");
+        var end = "\r\n";
 
-    public void Initialize(string port, int baudRate)
-    {
-        communication.Initialize(port, baudRate);
-    }
+        for (var i = 0; i < _retries + 1; i++)
+        {
+            string ack = "";
+            _communication.GetSerialPort().Write(start + functionHex + dataChunkHex + lrcHex + end);
+            try
+            {
+                ack = await ReadCrLfLineFromStreamAsync(_communication.GetSerialPort().BaseStream);
+            }
+            catch (TimeoutException e)
+            {
+                _logger.LogInformation("ACK packet receive timed out, retrying!");
+                continue;
+            }
 
-    public void Open()
-    {
-        communication.Open();
-        
-        logger.LogInformation("Communication started");
-    }
+            if (ack == "ACK") return true;
+        }
 
-    public void WriteToDisplay(string text)
-    {
-        SendModbusMessage(0, text.Select(l => (byte)l).ToArray());
+        return false;
     }
 
     public void WriteToDisplayScrolling(string text)
     {
         throw new NotImplementedException();
-    }
-
-    public void Close()
-    {
-        SendModbusMessage(1, new byte[] { });
-        communication.Close();
-        logger.LogInformation("Communication closed");
     }
 }

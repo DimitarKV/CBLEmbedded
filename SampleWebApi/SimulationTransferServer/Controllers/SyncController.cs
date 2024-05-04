@@ -11,21 +11,21 @@ public class SyncController(IPeripheralCommunication peripheral) : ControllerBas
     [HttpPost]
     public async Task<IActionResult> All([FromForm] SyncAllDto dto)
     {
-        peripheral.WriteToDisplay(dto.swing1Rotation.ToString());
+        await peripheral.WriteToDisplay(dto.swing1Rotation.ToString());
         return Ok();
     }
     
     [HttpPost]
     public async Task<IActionResult> Display([FromForm] SyncDisplayDto dto)
     {
-        peripheral.WriteToDisplay(dto.Text);
+        await peripheral.WriteToDisplay(dto.Text);
         return Ok();
     }
     
     [HttpPost]
     public async Task<IActionResult> ClearDisplay()
     {
-        peripheral.WriteToDisplay("");
+        await peripheral.WriteToDisplay("");
         return Ok();
     }
 }

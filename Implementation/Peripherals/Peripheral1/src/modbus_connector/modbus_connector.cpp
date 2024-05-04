@@ -75,20 +75,14 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
         char function[3];
         memcpy(function, &buffer[1], 2);
         function[2] = '\0';
-        Serial.print("Function: ");
-        Serial.println(function);
 
         char data[dataLength + 1];
         memcpy(data, &buffer[3], dataLength);
         data[dataLength] = '\0';
-        Serial.print("Data: ");
-        Serial.println(data);
 
         char lrc[3];
         memcpy(lrc, &buffer[length - 2], 2);
         lrc[2] = '\0';
-        Serial.print("LRC: ");
-        Serial.println(lrc);
 
         int receivedLRC = std::strtol(lrc, 0, 16);
         int calculatedLRC = calculateLRCFromHex(&buffer[1], dataLength + 2);
@@ -113,6 +107,9 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
 void ModbusConnector::processModbusCommand(ModbusPacket packet) {
     if(packet.isValid) {
         this->processors[packet.function](packet);
+        Serial.println("ACK");
+    } else {
+        Serial.println("NACK");
     }
 }
 

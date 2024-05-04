@@ -1,4 +1,3 @@
-using SimulationTransferServer;
 using SimulationTransferServer.Extensions;
 using SimulationTransferServer.Services.Interfaces;
 
@@ -27,9 +26,9 @@ peripheralCommunication.Open();
 
 
 var peripheral = app.Services.GetService<IPeripheralCommunication>();
-peripheral!.WriteToDisplay(" Welcome to our   sweet robot!");
+await peripheral!.WriteToDisplay(" Welcome to our   sweet robot!");
 
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
-peripheral.Close();
+await peripheral.Close();
