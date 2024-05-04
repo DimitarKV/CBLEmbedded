@@ -34,6 +34,21 @@ byte ModbusConnector::calculateLRC(char* buffer, int length)
     return calculatedLrc;
 }
 
+byte ModbusConnector::calculateLRCFromHex(char* buffer, int length)
+{
+    int calculatedLrc = 0;
+    for (int i = 0; i < length; i += 2)
+    {
+        char bHex[3];
+        memcpy(bHex, &buffer[i], 2);
+        bHex[2] = '\0';
+        byte b = strtol(bHex, 0, 16);
+        calculatedLrc = (calculatedLrc + b) & 0xFF;
+    }
+    calculatedLrc = (((calculatedLrc ^ 0xFF) + 1) & 0xFF);
+    return calculatedLrc;
+}
+
 
 bool ModbusConnector::serialRead()
 {
@@ -60,17 +75,23 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
         char function[3];
         memcpy(function, &buffer[1], 2);
         function[2] = '\0';
+        Serial.print("Function: ");
+        Serial.println(function);
 
         char data[dataLength + 1];
         memcpy(data, &buffer[3], dataLength);
         data[dataLength] = '\0';
+        Serial.print("Data: ");
+        Serial.println(data);
 
         char lrc[3];
         memcpy(lrc, &buffer[length - 2], 2);
         lrc[2] = '\0';
+        Serial.print("LRC: ");
+        Serial.println(lrc);
 
         int receivedLRC = std::strtol(lrc, 0, 16);
-        int calculatedLRC = calculateLRC(&buffer[1], dataLength + 2);
+        int calculatedLRC = calculateLRCFromHex(&buffer[1], dataLength + 2);
         if (receivedLRC != calculatedLRC)
         {
             return;
@@ -88,35 +109,6 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
         }
     }
 }
-
-// ModbusPacket Communication::decodeModbusMessage(byte* buffer, int length)
-// {
-//     this->packet.function = 0;
-//     this->packet.data = nullptr;
-//     this->packet.isValid = false;
-//     if (input.length() >= 7 && input[0] == ':')
-//     {
-//         std::string function = input.substr(1, 2);
-//         std::string data = input.substr(3, input.length() - 7);
-//         std::string lrc = input.substr(input.length() - 4, 2);
-//         std::string end = input.substr(input.length() - 2);
-//         int receivedLRC = std::strtol(lrc.c_str(), 0, 16);
-//         int calculatedLRC = calculateLRC(function + data);
-//         if (receivedLRC != calculatedLRC)
-//         {
-//             return packet;
-//         }
-//         this->packet.isValid = true;
-//         this->packet.function = std::strtol(function.c_str(), 0, 16);
-//         this->packet.dataLength = data.length() / 2;
-//         this->packet.data = new byte[this->packet.dataLength];
-//         for (int i = 0; i < data.length(); i += 2)
-//         {
-//             this->packet.data[i / 2] = std::strtol(data.substr(i, 2).c_str(), 0, 16);
-//         }
-//     }
-//     return this->packet;
-// }
 
 void ModbusConnector::processModbusCommand(ModbusPacket packet) {
     if(packet.isValid) {

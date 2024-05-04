@@ -36,12 +36,18 @@ void writeToDisplayNoScrolling(ModbusPacket inputPacket)
     }
   }
 }
+
+void handlePortDisconnected(ModbusPacket packet) {
+  lcd.clear();
+}
+
 void setup()
 {
   lcd.init();
   lcd.backlight();
 
   connector.addProcessor(0, *writeToDisplayNoScrolling);
+  connector.addProcessor(1, *handlePortDisconnected);
 
   Serial.begin(115200);
 }

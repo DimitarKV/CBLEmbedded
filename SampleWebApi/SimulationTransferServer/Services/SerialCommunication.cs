@@ -16,13 +16,13 @@ public class SerialCommunication : ISerialCommunication
     public void Open()
     {
         Sp.Open();
-        Console.WriteLine("Serial port open!");
+        //Purge receive buffer of Arduino after opening since sp.Open() sends "dddd" after initialization, which messes up Arduino logic
+        Sp.Write(":?:?aAbBcC\r\n");
     }
 
     public void Close()
     {
         Sp.Close();
-        Console.WriteLine("Serial port closed!");
     }
 
     public SerialPort GetSerialPort()

@@ -1,7 +1,7 @@
 ﻿using SimulationTransferServer.Services;
 using SimulationTransferServer.Services.Interfaces;
 
-namespace SimulationTransferServer;
+namespace SimulationTransferServer.Extensions;
 
 public static class Extensions
 {

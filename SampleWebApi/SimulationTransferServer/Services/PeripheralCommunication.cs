@@ -2,11 +2,12 @@
 
 namespace SimulationTransferServer.Services;
 
-public class PeripheralCommunication(ISerialCommunication communication) : IPeripheralCommunication
+public class PeripheralCommunication(ISerialCommunication communication, ILogger<PeripheralCommunication> logger) : IPeripheralCommunication
 {
-    private int CalculateLrc(string input)
+    private int CalculateLrc(byte function, byte[] input)
     {
         int calculatedLrc = 0;
+        calculatedLrc = (calculatedLrc + function) & 0xFF;
         foreach (char b in input)
         {
             calculatedLrc = (calculatedLrc + b) & 0xFF;
@@ -16,29 +17,55 @@ public class PeripheralCommunication(ISerialCommunication communication) : IPeri
         return calculatedLrc;
     }
 
-    private string StringToDataChunk(string input)
+    private string ConvertToDataChunk(byte[] data)
     {
-        string data = "";
-        foreach (char letter in input)
+        string chunk = "";
+        foreach (byte b in data)
         {
-            data += ((int)letter).ToString("x2");
+            chunk += ((int)b).ToString("x2");
         }
 
-        return data;
+        return chunk;
+    }
+
+    private bool SendModbusMessage(int function, byte[] data)
+    {
+        string start = ":";
+        string functionHex = function.ToString("x2");
+        string dataChunkHex = ConvertToDataChunk(data);
+        string lrcHex = CalculateLrc((byte)function, data).ToString("x2");
+        string end = "\r\n";
+        communication.GetSerialPort().Write(start + functionHex + dataChunkHex + lrcHex + end);
+        // TODO: Add ACK/NACK
+        return true;
+    }
+
+    public void Initialize(string port, int baudRate)
+    {
+        communication.Initialize(port, baudRate);
+    }
+
+    public void Open()
+    {
+        communication.Open();
+        
+        logger.LogInformation("Communication started");
     }
 
     public void WriteToDisplay(string text)
     {
-        string start = ":";
-        string function = "00";
-        string dataChunk = StringToDataChunk(text);
-        string lrc = CalculateLrc(function + dataChunk).ToString("x2");
-        string end = "\r\n";
-        communication.GetSerialPort().Write(start + function + dataChunk + lrc + end);
+        SendModbusMessage(0, text.Select(l => (byte)l).ToArray());
     }
 
     public void WriteToDisplayScrolling(string text)
     {
-        communication.GetSerialPort().Write("WDS" + text + "\r\n");
+        throw new NotImplementedException();
+    }
+
+    public void Close()
+    {
+        SendModbusMessage(1, new byte[] { });
+        communication.Close();
+        logger.LogInformation("Communication closed");
     }
 }

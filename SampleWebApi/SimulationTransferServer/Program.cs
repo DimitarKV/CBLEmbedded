@@ -1,8 +1,10 @@
 using SimulationTransferServer;
+using SimulationTransferServer.Extensions;
 using SimulationTransferServer.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -19,16 +21,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var sp = app.Services.GetService<ISerialCommunication>();
-sp.Initialize(builder.Configuration["SerialPort:Port"], int.Parse(builder.Configuration["SerialPort:Baudrate"]));
-sp.Open();
-//Purge receive buffer of Arduino after opening since sp.Open() sends "dddd" after initialization, which messes up Arduino logic
-sp.GetSerialPort().Write(":?:?aAbBcC\r\n");
+var peripheralCommunication = app.Services.GetService<IPeripheralCommunication>();
+peripheralCommunication!.Initialize(builder.Configuration["SerialPort:Port"]!, int.Parse(builder.Configuration["SerialPort:BaudRate"]!));
+peripheralCommunication.Open();
+
 
 var peripheral = app.Services.GetService<IPeripheralCommunication>();
-peripheral.WriteToDisplay("Welcome to our  sweet robot!");
+peripheral!.WriteToDisplay(" Welcome to our   sweet robot!");
 
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
-sp.Close();
+peripheral.Close();
