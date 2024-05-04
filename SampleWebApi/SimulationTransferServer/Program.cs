@@ -26,7 +26,7 @@ sp.Open();
 sp.GetSerialPort().Write(":?:?aAbBcC\r\n");
 
 var peripheral = app.Services.GetService<IPeripheralCommunication>();
-peripheral.WriteToDisplay("Welcome to our sweet robot, feel free to test it's abilities!");
+peripheral.WriteToDisplay("Welcome to our  sweet robot!");
 
 app.UseHttpsRedirection();
 app.MapControllers();

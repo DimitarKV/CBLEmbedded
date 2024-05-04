@@ -17,7 +17,24 @@ ModbusConnector connector;
 void writeToDisplayNoScrolling(ModbusPacket inputPacket)
 {
   lcd.clear();
-  lcd.print((char *)inputPacket.data);
+  
+  if(inputPacket.dataLength <= 16) {
+    for (int i = 0; i < inputPacket.dataLength; i++)
+    {
+      lcd.print((char)inputPacket.data[i]);
+    }
+  }
+  else {
+    for (int i = 0; i < 16; i++)
+    {
+      lcd.print((char)inputPacket.data[i]);
+    }
+    lcd.setCursor(0, 1);
+    for (int i = 16; i < inputPacket.dataLength; i++)
+    {
+      lcd.print((char)inputPacket.data[i]);
+    }
+  }
 }
 void setup()
 {
