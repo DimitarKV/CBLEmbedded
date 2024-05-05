@@ -1,7 +1,9 @@
-﻿namespace SimulationTransferServer.Services;
+﻿using SimulationTransferServer.Types;
+
+namespace SimulationTransferServer.Services;
 
 public interface IRobotService
 {
-    Task<bool> WriteToDisplay(string text);
-    Task<int> ReadDummySensor();
+    Task<bool> WriteToDisplay(WriteToDisplayMessage message);
+    Task<ReadDummySensorMessage> ReadDummySensor(ReadDummySensorMessage message);
 }

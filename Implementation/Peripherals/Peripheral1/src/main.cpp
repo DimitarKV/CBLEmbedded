@@ -35,13 +35,10 @@ void writeToDisplayNoScrolling(ModbusPacket inputPacket)
       lcd.print((char)inputPacket.data[i]);
     }
   }
-
-  Serial.println("ACK");
 }
 
 void handlePortDisconnected(ModbusPacket packet) {
   lcd.clear();
-  Serial.println("ACK");
 }
 
 void readDummySensor(ModbusPacket packet) {

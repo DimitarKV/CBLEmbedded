@@ -1,4 +1,5 @@
-﻿using SimulationTransferServer.Connectors;
+﻿using Modbus.Connectors;
+using SimulationTransferServer.Types;
 
 namespace SimulationTransferServer.Services.Implementation;
 
@@ -11,17 +12,15 @@ public class RobotService : IRobotService
         _modbusConnector = modbusConnector;
     }
 
-    public async Task<bool> WriteToDisplay(string text)
+    public async Task<bool> WriteToDisplay(WriteToDisplayMessage message)
     {
         return await _modbusConnector
-            .SendModbusMessageAsync(0, text.Select(c => (byte)c)
-            .ToArray());
+            .SendModbusMessageAsync(message.Function, message.toByteArray());
     }
 
-    public async Task<int> ReadDummySensor()
+    public async Task<ReadDummySensorMessage> ReadDummySensor(ReadDummySensorMessage message)
     {
-        await _modbusConnector.SendModbusMessageAsync(2, new byte[] { });
-        // _modbusConnector.Read();
-        return await _modbusConnector.ReadModbusMessageAsync<int>();
+        await _modbusConnector.SendModbusMessageAsync(message.Function, new byte[] { });
+        return new ReadDummySensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }
 }

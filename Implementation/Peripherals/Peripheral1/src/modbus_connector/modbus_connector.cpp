@@ -106,6 +106,7 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
 
 void ModbusConnector::processModbusCommand(ModbusPacket packet) {
     if(packet.isValid) {
+        Serial.println("ACK");
         this->processors[packet.function](packet);
         
     } else {

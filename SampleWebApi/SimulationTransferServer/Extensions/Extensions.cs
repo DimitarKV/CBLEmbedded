@@ -1,6 +1,4 @@
-﻿using SimulationTransferServer.Configuration;
-using SimulationTransferServer.Connectors;
-using SimulationTransferServer.Connectors.Implementation;
+﻿using Modbus.Configuration;
 using SimulationTransferServer.Services;
 using SimulationTransferServer.Services.Implementation;
 
@@ -12,7 +10,6 @@ public static class Extensions
     {
         builder.Services.Configure<SerialPortOptions>(builder.Configuration.GetSection(SerialPortOptions.SerialPort));
         builder.Services.AddSingleton<IRobotService, RobotService>();
-        builder.Services.AddSingleton<IModbusConnector, ModbusConnector>();
 
     }
 }

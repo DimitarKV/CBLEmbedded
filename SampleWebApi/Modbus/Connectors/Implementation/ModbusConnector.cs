@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Options;
-using SimulationTransferServer.Configuration;
+﻿using System.Globalization;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Modbus.Configuration;
 
-namespace SimulationTransferServer.Connectors.Implementation;
+namespace Modbus.Connectors.Implementation;
 
 public class ModbusConnector : PortConnector, IModbusConnector
 {
@@ -26,15 +28,20 @@ public class ModbusConnector : PortConnector, IModbusConnector
         var funcDataChunkHex = ConvertToDataChunk(funcDataChunk);
         var lrcHex = CalculateLrc(funcDataChunk).ToString("x2");
         var end = "\r\n";
-        return await TrySendAsync(start + funcDataChunkHex + lrcHex + end);
+        var message = start + funcDataChunkHex + lrcHex + end;
+        return await TrySendAsync(message);
     }
 
-    public async Task<T> ReadModbusMessageAsync<T>() where T : new()
+    public async Task<byte[]> ReadModbusMessageAsync()
     {
         string modbusChunk = await ReadCrLfLineFromStreamAsync();
         string dataChunk = modbusChunk.Substring(3, modbusChunk.Length - 5);
-        Console.WriteLine(dataChunk);
-        return new T();
+        byte[] buffer = new byte[dataChunk.Length/2];
+        for (int i = 0; i < dataChunk.Length; i+=2)
+        {
+            buffer[i / 2] = byte.Parse(dataChunk.Substring(i, 2), NumberStyles.HexNumber);
+        }
+        return buffer;
     }
 
     public void Read()

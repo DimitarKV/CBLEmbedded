@@ -1,8 +1,8 @@
 ﻿using System.IO.Ports;
 using Microsoft.Extensions.Options;
-using SimulationTransferServer.Configuration;
+using Modbus.Configuration;
 
-namespace SimulationTransferServer.Connectors.Implementation;
+namespace Modbus.Connectors.Implementation;
 
 public class PortConnector : SerialPort
 {

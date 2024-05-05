@@ -1,6 +1,7 @@
-using SimulationTransferServer.Connectors;
+using Modbus.Extensions;
 using SimulationTransferServer.Extensions;
 using SimulationTransferServer.Services;
+using SimulationTransferServer.Types;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -11,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.AddExtensions();
+builder.AddModbusExtensions();
 
 var app = builder.Build();
 
@@ -22,7 +24,7 @@ if (app.Environment.IsDevelopment())
 }
 
 var robotService = app.Services.GetService<IRobotService>();
-await robotService!.WriteToDisplay(" Welcome to our   sweet robot!");
+await robotService!.WriteToDisplay(new WriteToDisplayMessage(" Welcome to our   sweet robot!"));
 
 app.UseHttpsRedirection();
 app.MapControllers();

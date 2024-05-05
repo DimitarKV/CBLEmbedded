@@ -1,4 +1,4 @@
-﻿namespace SimulationTransferServer.Configuration;
+﻿namespace Modbus.Configuration;
 
 public class SerialPortOptions
 {

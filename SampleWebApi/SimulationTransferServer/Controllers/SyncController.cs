@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SimulationTransferServer.Dto;
 using SimulationTransferServer.Services;
+using SimulationTransferServer.Types;
 
 namespace SimulationTransferServer.Controllers;
 
@@ -11,27 +12,27 @@ public class SyncController(IRobotService robotService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> All([FromForm] SyncAllDto dto)
     {
-        await robotService.WriteToDisplay(dto.swing1Rotation.ToString());
+        await robotService.WriteToDisplay(new WriteToDisplayMessage(dto.swing1Rotation.ToString()));
         return Ok();
     }
     
     [HttpPost]
     public async Task<IActionResult> Display([FromForm] SyncDisplayDto dto)
     {
-        await robotService.WriteToDisplay(dto.Text);
+        await robotService.WriteToDisplay(new WriteToDisplayMessage(dto.Text));
         return Ok();
     }
     
     [HttpPost]
     public async Task<IActionResult> ClearDisplay()
     {
-        await robotService.WriteToDisplay("");
+        await robotService.WriteToDisplay(new WriteToDisplayMessage(""));
         return Ok();
     }
 
     public async Task<IActionResult> Test()
     {
-        await robotService.ReadDummySensor();
-        return Ok();
+        var message = await robotService.ReadDummySensor(new ReadDummySensorMessage());
+        return Ok(message);
     }
 }
