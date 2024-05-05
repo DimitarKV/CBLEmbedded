@@ -5,6 +5,7 @@ using Modbus.Configuration;
 
 namespace Modbus.Connectors.Implementation;
 
+
 public class ModbusConnector : PortConnector, IModbusConnector
 {
     private int _retries;
@@ -55,7 +56,6 @@ public class ModbusConnector : PortConnector, IModbusConnector
             
         }
     }
-
 
     public bool CanRead()
     {
