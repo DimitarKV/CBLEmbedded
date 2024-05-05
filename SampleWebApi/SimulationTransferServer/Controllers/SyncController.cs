@@ -1,31 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SimulationTransferServer.Dto;
-using SimulationTransferServer.Services.Interfaces;
+using SimulationTransferServer.Services;
 
 namespace SimulationTransferServer.Controllers;
 
 [ApiController]
 [Route("/[controller]/[action]")]
-public class SyncController(IPeripheralCommunication peripheral) : ControllerBase
+public class SyncController(IRobotService robotService) : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> All([FromForm] SyncAllDto dto)
     {
-        await peripheral.WriteToDisplay(dto.swing1Rotation.ToString());
+        await robotService.WriteToDisplay(dto.swing1Rotation.ToString());
         return Ok();
     }
     
     [HttpPost]
     public async Task<IActionResult> Display([FromForm] SyncDisplayDto dto)
     {
-        await peripheral.WriteToDisplay(dto.Text);
+        await robotService.WriteToDisplay(dto.Text);
         return Ok();
     }
     
     [HttpPost]
     public async Task<IActionResult> ClearDisplay()
     {
-        await peripheral.WriteToDisplay("");
+        await robotService.WriteToDisplay("");
         return Ok();
     }
 }

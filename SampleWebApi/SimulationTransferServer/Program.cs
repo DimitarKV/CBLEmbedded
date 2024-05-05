@@ -1,5 +1,6 @@
+using SimulationTransferServer.Connectors;
 using SimulationTransferServer.Extensions;
-using SimulationTransferServer.Services.Interfaces;
+using SimulationTransferServer.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -20,15 +21,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-var peripheralCommunication = app.Services.GetService<IPeripheralCommunication>();
-peripheralCommunication!.Initialize(builder.Configuration["SerialPort:Port"]!, int.Parse(builder.Configuration["SerialPort:BaudRate"]!));
-peripheralCommunication.Open();
-
-
-var peripheral = app.Services.GetService<IPeripheralCommunication>();
-await peripheral!.WriteToDisplay(" Welcome to our   sweet robot!");
+var robotService = app.Services.GetService<IRobotService>();
+await robotService!.WriteToDisplay(" Welcome to our   sweet robot!");
 
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
-await peripheral.Close();
