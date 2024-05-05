@@ -107,7 +107,7 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
 void ModbusConnector::processModbusCommand(ModbusPacket packet) {
     if(packet.isValid) {
         this->processors[packet.function](packet);
-        Serial.println("ACK");
+        
     } else {
         Serial.println("NACK");
     }
@@ -151,4 +151,34 @@ void ModbusConnector::tick()
 
 void ModbusConnector::addProcessor(byte function, modbusFuncPtr processor) {
     processors[function] = processor;
+}
+
+void ModbusConnector::printHex(byte value) {
+    if (value == 0)
+    {
+        Serial.print("00");
+        return;
+    }
+    if(value <= 0xF) {
+        Serial.print("0");
+    }
+    Serial.print(value, HEX);
+}
+
+// Buffer must be null-terminated
+void ModbusConnector::sendData(byte function, char* buffer) {
+    int length = extractNullTerminatedLength(buffer);
+    char funcDataChunk[length + 2];
+    memcpy(&funcDataChunk[1], buffer, length + 1);
+    funcDataChunk[0] = function;
+
+    Serial.print(":");
+    int index = 0;
+    while (funcDataChunk[index] != '\0')
+    {
+        printHex(funcDataChunk[index]);
+        index++;
+    }
+    printHex(calculateLRC(funcDataChunk));
+    Serial.print("\r\n");
 }

@@ -34,10 +34,11 @@ private:
     void decodeModbusMessage(char* buffer, int length);
     void handleSerial();
     void processModbusCommand(ModbusPacket packet);
-
+    void printHex(byte value);
 public:
     void tick();
     void addProcessor(byte function, modbusFuncPtr processor);
+    void sendData(byte function, char* buffer);
 };
 
 #endif

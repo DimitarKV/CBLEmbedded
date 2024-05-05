@@ -35,10 +35,22 @@ void writeToDisplayNoScrolling(ModbusPacket inputPacket)
       lcd.print((char)inputPacket.data[i]);
     }
   }
+
+  Serial.println("ACK");
 }
 
 void handlePortDisconnected(ModbusPacket packet) {
   lcd.clear();
+  Serial.println("ACK");
+}
+
+void readDummySensor(ModbusPacket packet) {
+  uint16_t value = random(0, 65536);
+  byte data[3];
+  data[0] = value >> 8;
+  data[1] = value & 0xFF;
+  data[2] = '\0';
+  connector.sendData(2, (char*)&data);
 }
 
 void setup()
@@ -48,6 +60,7 @@ void setup()
 
   connector.addProcessor(0, *writeToDisplayNoScrolling);
   connector.addProcessor(1, *handlePortDisconnected);
+  connector.addProcessor(2, *readDummySensor);
 
   Serial.begin(115200);
 }
