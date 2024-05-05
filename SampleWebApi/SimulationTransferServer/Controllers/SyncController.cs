@@ -28,4 +28,10 @@ public class SyncController(IRobotService robotService) : ControllerBase
         await robotService.WriteToDisplay("");
         return Ok();
     }
+
+    public async Task<IActionResult> Test()
+    {
+        await robotService.ReadDummySensor();
+        return Ok();
+    }
 }

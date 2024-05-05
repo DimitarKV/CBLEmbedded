@@ -3,4 +3,5 @@
 public interface IRobotService
 {
     Task<bool> WriteToDisplay(string text);
+    Task<int> ReadDummySensor();
 }

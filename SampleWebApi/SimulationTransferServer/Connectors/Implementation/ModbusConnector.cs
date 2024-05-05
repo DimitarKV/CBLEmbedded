@@ -29,10 +29,26 @@ public class ModbusConnector : PortConnector, IModbusConnector
         return await TrySendAsync(start + funcDataChunkHex + lrcHex + end);
     }
 
-    public Task<byte[]> ReadModbusMessageAsync()
+    public async Task<T> ReadModbusMessageAsync<T>() where T : new()
     {
-        throw new NotImplementedException();
+        string modbusChunk = await ReadCrLfLineFromStreamAsync();
+        string dataChunk = modbusChunk.Substring(3, modbusChunk.Length - 5);
+        Console.WriteLine(dataChunk);
+        return new T();
     }
+
+    public void Read()
+    {
+        while (true)
+        {
+            if (BytesToRead != 0)
+            {
+                Console.Write((char)ReadByte());
+            }
+            
+        }
+    }
+
 
     public bool CanRead()
     {

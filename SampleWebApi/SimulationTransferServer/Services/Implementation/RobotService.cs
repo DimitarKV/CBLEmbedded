@@ -17,4 +17,11 @@ public class RobotService : IRobotService
             .SendModbusMessageAsync(0, text.Select(c => (byte)c)
             .ToArray());
     }
+
+    public async Task<int> ReadDummySensor()
+    {
+        await _modbusConnector.SendModbusMessageAsync(2, new byte[] { });
+        // _modbusConnector.Read();
+        return await _modbusConnector.ReadModbusMessageAsync<int>();
+    }
 }
