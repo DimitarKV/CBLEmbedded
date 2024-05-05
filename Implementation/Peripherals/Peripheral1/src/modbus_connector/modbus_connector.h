@@ -38,7 +38,7 @@ private:
 public:
     void tick();
     void addProcessor(byte function, modbusFuncPtr processor);
-    void sendData(byte function, char* buffer);
+    void sendData(byte function, byte* buffer, int length);
 };
 
 #endif

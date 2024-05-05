@@ -1,4 +1,5 @@
-﻿using Modbus.Connectors;
+﻿using System.Diagnostics;
+using Modbus.Connectors;
 using SimulationTransferServer.Types;
 
 namespace SimulationTransferServer.Services.Implementation;
@@ -20,6 +21,7 @@ public class RobotService : IRobotService
 
     public async Task<ReadDummySensorMessage> ReadDummySensor(ReadDummySensorMessage message)
     {
+        
         await _modbusConnector.SendModbusMessageAsync(message.Function, new byte[] { });
         return new ReadDummySensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }

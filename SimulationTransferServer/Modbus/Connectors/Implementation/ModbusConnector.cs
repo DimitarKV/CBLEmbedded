@@ -95,6 +95,7 @@ public class ModbusConnector : PortConnector, IModbusConnector
                 continue;
             }
             if (ack == "ACK") return true;
+            _logger.LogInformation("ACK packet receive unsuccessful, retrying!");
         }
         return false;
     }

@@ -1,8 +1,4 @@
 #include <Arduino.h>
-#include <StandardCplusplus.h>
-#include <iostream>
-#include <string>
-#include <vector>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <modbus_connector/modbus_connector.h>
@@ -42,12 +38,8 @@ void handlePortDisconnected(ModbusPacket packet) {
 }
 
 void readDummySensor(ModbusPacket packet) {
-  uint16_t value = random(0, 65536);
-  byte data[3];
-  data[0] = value >> 8;
-  data[1] = value & 0xFF;
-  data[2] = '\0';
-  connector.sendData(2, (char*)&data);
+  uint16_t value = 3;
+  connector.sendData(2, (byte*)&value, sizeof(value));
 }
 
 void setup()
@@ -59,7 +51,7 @@ void setup()
   connector.addProcessor(1, *handlePortDisconnected);
   connector.addProcessor(2, *readDummySensor);
 
-  Serial.begin(115200);
+  Serial.begin(500000);
 }
 
 void loop()

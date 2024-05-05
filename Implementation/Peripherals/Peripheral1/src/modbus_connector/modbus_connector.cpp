@@ -1,6 +1,5 @@
 #include "modbus_connector.h"
 
-
 int ModbusConnector::extractNullTerminatedLength(char* buffer) {
     int index = 0;
     while (buffer[index] != '\0')
@@ -122,24 +121,6 @@ void ModbusConnector::handleSerial()
         processModbusCommand(packet);
     }
     serialBufferIndex = 0;
-
-    // Convert the buffer to a usable std::string
-    // if(token[0] == ':') {
-    //   serialBufferIndex = 0;
-    //   return;
-    // }
-    // // Extract the command
-    // std::string command = token.substr(0, 3);
-    // // Extract the parameters
-    // std::string parameters = token.substr(3);
-
-    // if (command.compare("WDN") == 0)
-    // {
-    //   writeToDisplayNoScrolling(parameters);
-    // } else if(command.compare("SSP") == 0) {
-    //   //std::vector<std::string> parsedParameters = splitParameters(parameters);
-
-    // }
 }
 
 void ModbusConnector::tick()
@@ -166,9 +147,7 @@ void ModbusConnector::printHex(byte value) {
     Serial.print(value, HEX);
 }
 
-// Buffer must be null-terminated
-void ModbusConnector::sendData(byte function, char* buffer) {
-    int length = extractNullTerminatedLength(buffer);
+void ModbusConnector::sendData(byte function, byte* buffer, int length) {
     char funcDataChunk[length + 2];
     memcpy(&funcDataChunk[1], buffer, length + 1);
     funcDataChunk[0] = function;
