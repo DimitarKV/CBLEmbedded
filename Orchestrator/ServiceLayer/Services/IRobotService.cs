@@ -1,7 +1,6 @@
-﻿using SimulationTransferServer.Dto;
-using SimulationTransferServer.Types;
+﻿using ServiceLayer.Types;
 
-namespace SimulationTransferServer.Services;
+namespace ServiceLayer.Services;
 
 public interface IRobotService
 {

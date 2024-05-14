@@ -17,6 +17,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Modbus\Modbus.csproj" />
+      <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj" />
     </ItemGroup>
 
 </Project>

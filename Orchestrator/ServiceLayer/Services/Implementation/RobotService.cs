@@ -1,7 +1,7 @@
 ﻿using Modbus.Connectors;
-using SimulationTransferServer.Types;
+using ServiceLayer.Types;
 
-namespace SimulationTransferServer.Services.Implementation;
+namespace ServiceLayer.Services.Implementation;
 
 public class RobotService : IRobotService
 {

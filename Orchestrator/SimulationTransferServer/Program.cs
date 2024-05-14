@@ -1,7 +1,7 @@
 using Modbus.Extensions;
+using ServiceLayer.Services;
+using ServiceLayer.Types;
 using SimulationTransferServer.Extensions;
-using SimulationTransferServer.Services;
-using SimulationTransferServer.Types;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();

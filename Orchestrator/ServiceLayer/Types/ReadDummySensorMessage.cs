@@ -1,6 +1,6 @@
 ﻿using Modbus.Types.Interfaces;
 
-namespace SimulationTransferServer.Types;
+namespace ServiceLayer.Types;
 
 public class ReadDummySensorMessage : IModbusSerializable, IModbusDeserializable<ReadDummySensorMessage>
 {

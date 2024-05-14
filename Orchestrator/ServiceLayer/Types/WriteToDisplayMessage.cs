@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Modbus.Types.Interfaces;
 
-namespace SimulationTransferServer.Types;
+namespace ServiceLayer.Types;
 
 public class WriteToDisplayMessage : IModbusSerializable, IModbusDeserializable<WriteToDisplayMessage>
 {

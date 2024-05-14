@@ -1,6 +1,6 @@
 ﻿using Modbus.Configuration;
-using SimulationTransferServer.Services;
-using SimulationTransferServer.Services.Implementation;
+using ServiceLayer.Services;
+using ServiceLayer.Services.Implementation;
 
 namespace SimulationTransferServer.Extensions;
 

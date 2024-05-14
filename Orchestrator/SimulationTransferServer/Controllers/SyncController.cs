@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
+using ServiceLayer.Services;
+using ServiceLayer.Types;
 using SimulationTransferServer.Dto;
-using SimulationTransferServer.Services;
-using SimulationTransferServer.Types;
 
 namespace SimulationTransferServer.Controllers;
 
