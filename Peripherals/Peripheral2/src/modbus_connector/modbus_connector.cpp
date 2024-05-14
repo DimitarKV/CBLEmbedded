@@ -126,7 +126,7 @@ void ModbusConnector::handleSerial()
 }
 
 void ModbusConnector::init() {
-    for (int i = 0; i < this->processorsCount; i++)
+    for (int i = 0; i < PROCESSORS_COUNT; i++)
     {
         processors[i] = nullptr;
     }

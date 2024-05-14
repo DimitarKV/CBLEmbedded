@@ -4,11 +4,15 @@
 #include <Arduino.h>
 #include <cstdlib>
 
+#define MODBUS_PACKET_DATA_SIZE 1024
+#define SERIAL_BUFFER_SIZE 2048
+#define PROCESSORS_COUNT 32
+
 struct ModbusPacket
 {
     byte function;
     int dataLength;
-    byte data[128];
+    byte data[MODBUS_PACKET_DATA_SIZE];
     bool isValid = false;
 };
 
@@ -17,10 +21,8 @@ typedef  void (*modbusFuncPtr)(ModbusPacket);
 class ModbusConnector
 {
 private:
-    static const int processorsCount = 32;
-
-    char serialBuffer[256];
-    modbusFuncPtr processors[processorsCount];
+    char serialBuffer[SERIAL_BUFFER_SIZE];
+    modbusFuncPtr processors[PROCESSORS_COUNT];
     int serialBufferIndex = 0;
     int serialBytesToRead = 0;
     ModbusPacket packet;

@@ -10,7 +10,7 @@ void writeToDisplayNoScrolling(ModbusPacket inputPacket)
 {
   tft.fillScreen(0xfb80);
   tft.setTextSize(2);
-  tft.setCursor(5, 5);
+  tft.setCursor(0, 2);
   tft.setTextColor(0);
   tft.print((char *)inputPacket.data);
 }
