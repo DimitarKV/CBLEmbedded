@@ -61,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\ConveyorBelt.cs" />
+    <Compile Include="Assets\Scripts\Rotation.cs" />
+    <Compile Include="Assets\Scripts\ServerSync.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

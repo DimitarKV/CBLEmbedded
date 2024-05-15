@@ -11,14 +11,15 @@ public class ConveyorBelt : MonoBehaviour
 
     void Start()
     {
-
+        Time.timeScale = 1;
     }
 
     void Update()
     {
         foreach (var item in onBelt)
         {
-            item.GetComponent<Rigidbody>().velocity = direction * speed * Time.deltaTime;
+            //item.GetComponent<Rigidbody>().velocity = direction * speed * Time.deltaTime;
+            item.transform.Translate(direction * speed * Time.deltaTime);
         }
     }
 
