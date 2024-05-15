@@ -8,9 +8,7 @@
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_4X);
 // low light = higher integration time
 // gain controls the sensitivity of the sensor
-int error = 0;
-float r1, g1, b1;
-String color;
+bool error = 0;
 
 void setup()
 {
