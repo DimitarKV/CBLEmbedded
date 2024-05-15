@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include "Adafruit_TCS34725.h"
 
+
 // Create an istance of the TCS34725 class
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_4X);
 // low light = higher integration time

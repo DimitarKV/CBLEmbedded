@@ -1,0 +1,6 @@
+#ifndef COLORSENSOR_LIBRARY_H
+#define COLORSENSOR_LIBRARY_H
+
+
+
+#endif
