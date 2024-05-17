@@ -1,10 +1,25 @@
 #include "ColorSensor_library.h"
+#include "RGBConverter.h"
+
+
+uint16_t ColorSensor::getRed(){
+  return r;
+}
+uint16_t ColorSensor::getGreen(){
+  return g;
+}
+uint16_t ColorSensor::getBlue(){
+  return b;
+}
+uint16_t ColorSensor::getClear(){
+  return c;
+}
 
 /**
  * Checks the TCS34725 sensor. If found, prints "Found sensor". 
  * Otherwise, prints "No TCS34725 found" and enters an infinite loop.
  */
-void ColorSensor::errorSensorCheck(){
+void ColorSensor::sensorCheck(){
   if (tcs.begin())
   {
     Serial.println("Found sensor");
@@ -26,8 +41,9 @@ void ColorSensor::read(){
 
     // &r returns the address of the variable r
     tcs.getRawData(&r, &g, &b, &c); // reads raw sensor outputs
-    uint16_t colorTemp = tcs.calculateColorTemperature(r, g, b); // calculates the color temperature in Kelvin
-    uint16_t lux = tcs.calculateLux(r, g, b); // calculates the lux
+    colorTemp = tcs.calculateColorTemperature(r, g, b); // calculates the color temperature in Kelvin
+    lux = tcs.calculateLux(r, g, b); // calculates the lux
+    
 }
 
 /**
@@ -58,17 +74,19 @@ void ColorSensor::print(){
  * @param c the raw clear value detected by the sensor
 */
 void ColorSensor::colorDetect(uint16_t r, uint16_t g, uint16_t b, uint16_t c){
-  float normalizedRed = (float)r / (float)c;
-  float normalizedGreen = (float)g / (float)c;
-  float normalizedBlue = (float)b / (float)c;
+  RGBConverter rgb;
+  float hsv[3];
+  rgb.rgbToHsv(r,g,b,hsv);
+  Serial.print(hsv[0]); Serial.print(" "); Serial.print(hsv[1]); Serial.print(" "); Serial.println(hsv[2]);
 
-  const float threshold = 0.5;
-
-  if (normalizedRed > threshold && normalizedGreen > threshold && normalizedBlue > threshold) {
+  //TODO: normalize values?, Decide how to check black or white
+  
+  /*if (normalizedRed > threshold && normalizedGreen > threshold && normalizedBlue > threshold) {
         Serial.println("White object detected");
     } else {
         Serial.println("Black object detected");
     }
+    */
 }
 
 /**
