@@ -38,16 +38,6 @@ void loop()
   colorTemp = tcs.calculateColorTemperature(r, g, b); // calculates the color temperature in Kelvin
   lux = tcs.calculateLux(r, g, b); // calculates the lux
 
-  //int R = constrain( map(r, Rmin, Rmax, 0, 255), 0, 255);
-  //int G = constrain( map(g, Gmin, Gmax, 0, 255), 0, 255);
-  //int B = constrain( map(b, Bmin, Bmax, 0, 255), 0, 255);
-
-  /*Serial.print(r1);
-  Serial.print(" ");
-  Serial.print(g1);
-  Serial.print(" ");
-  Serial.println(b1);*/
-
   Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
   Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
   Serial.print("R: "); Serial.print(r, DEC); Serial.print(" - ");

@@ -13,9 +13,11 @@ class ColorSensor{
     bool error = 0;
     public: 
     ColorSensor();
+    void errorSensorCheck();
     void read();
     void print();
     void error_check();
+    void colorDetect(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
 };
 
 #endif
