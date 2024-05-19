@@ -10,7 +10,7 @@ class Motor{
 
    public:
    Motor();
-   void tick(int stepsPerRevolution, Stepper myStepper);
+   void tick(int stepsPerRevolution, int speed);
 
 };
 

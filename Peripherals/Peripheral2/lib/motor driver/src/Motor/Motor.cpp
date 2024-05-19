@@ -10,7 +10,7 @@ const int stepsPerRevolution = 2038;
 // Pins entered in sequence IN1-IN3-IN2-IN4 for proper step sequence
 Stepper myStepper = Stepper(stepsPerRevolution, 8, 10, 9, 11);
 
-void Motor::tick(int stepsPerRevolution, Stepper myStepper){
-    myStepper.setSpeed(15);
-	  myStepper.step(-stepsPerRevolution);
+void Motor::tick(int stepsPerRevolution, int speed){
+    myStepper.setSpeed(speed);
+	myStepper.step(-stepsPerRevolution);
 }
