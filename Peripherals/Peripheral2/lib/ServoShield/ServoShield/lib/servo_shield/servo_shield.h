@@ -12,12 +12,17 @@
 class Servo {
     private:
         Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+        int motionDuration[16];
+        int currentPosition[16];
+        int desiredPosition[16];
+        int64_t motionStartMS[16];
+        int64_t lastTickUpdate = 0;
+        int convertAngleToPosition(int angle);
     public:
         void init();
-        void setServo(int servonum);
-        void tick(int servonum, int angle);
-        int convertAngleToPosition(int angle);
-        void setAngle(int servonum, int angle);
+        void addServo(int servonum, int initialAngle);
+        void setAngle(int servonum, int angle, int durationMS);
+        void tick();
 };
 
 #endif // SERVO_SHIELD_H

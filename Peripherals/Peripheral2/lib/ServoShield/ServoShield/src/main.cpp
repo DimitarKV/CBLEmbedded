@@ -11,7 +11,7 @@ void setup() {
 }
 
 void loop() {
-  delay(100);
+  delay(1000);
   servo.tick(0, 90);
   servo.tick(1, 180);
 }
