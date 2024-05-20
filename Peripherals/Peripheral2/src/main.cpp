@@ -1,18 +1,16 @@
 #include <Arduino.h>
-#include <modbus_connector/modbus_connector.h>
-#include <Adafruit_GFX.h>
+#include <../lib/modbus_connector/modbus_connector.h>
+#include <../lib/color_sensor/color_sensor.h>
+#include <../lib/display_interface/display_interface.h>
 #include <Adafruit_ST7789.h>
+#include <Adafruit_GFX.h>
 
 ModbusConnector connector;
-Adafruit_ST7789 tft = Adafruit_ST7789(10, 2, 4);
+Display display = Display(10, 2, 4);
 
-void writeToDisplayNoScrolling(ModbusPacket inputPacket)
+void writeToDisplay(ModbusPacket inputPacket)
 {
-  tft.fillScreen(0xfb80);
-  tft.setTextSize(2);
-  tft.setCursor(0, 2);
-  tft.setTextColor(0);
-  tft.print((char *)inputPacket.data);
+  display.interpretMessage((char *)inputPacket.data);
 }
 
 void readDummySensor(ModbusPacket packet) {
@@ -25,14 +23,8 @@ void setServoAngle(ModbusPacket packet) {
 
 void setup() {
   Serial.begin(1000000);
-  tft.init(135, 240);
-  tft.setRotation(3);
-  tft.fillScreen(0xeeee);
-  tft.setCursor(5, 5);
-  tft.setTextSize(3);
-  tft.setTextWrap(true);
-  tft.setTextColor(0);
-  connector.addProcessor(0, *writeToDisplayNoScrolling);
+  display.init(135, 240, 3);
+  connector.addProcessor(0, *writeToDisplay);
   connector.addProcessor(2, *readDummySensor);
   connector.addProcessor(3, *setServoAngle);
 }

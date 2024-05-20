@@ -1,4 +1,0 @@
-repository "LuggageSimulator@DaniDS9@cloud"
-  path "/"
-    br "/main"
-    co "/main"
