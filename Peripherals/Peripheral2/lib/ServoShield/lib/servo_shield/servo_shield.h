@@ -18,6 +18,7 @@ class Servo {
         int64_t motionStartMS[16];
         int64_t lastTickUpdate = 0;
         int convertAngleToPosition(int angle);
+        long long motionStartTime[16];
     public:
         void init();
         void addServo(int servonum, int initialAngle);
