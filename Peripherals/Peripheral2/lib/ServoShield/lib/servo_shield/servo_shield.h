@@ -12,6 +12,8 @@
 class Servo {
     private:
         Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+        int motionDuration[16];
+        long long motionStartTime[16];
     public:
         void init();
         void setServo(int servonum);
