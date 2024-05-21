@@ -1,5 +1,5 @@
-#ifndef SERVO_SHIELD_H
-#define SERVO_SHIELD_H
+#ifndef SERVO_CONTROLLER_H
+#define SERVO_CONTROLLER_H
 
 #include <Wire.h>
 #include <SPI.h>
@@ -9,15 +9,17 @@
 #define SERVOMAX  500 // this is the 'maximum' pulse length count (out of 4096)
 #define SERVO_FREQ 50 // frequency of the PCA9685
 
-class Servo {
+class ServoController {
     private:
         Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
         int motionDuration[16];
         int currentPosition[16];
+        int startingPosition[16];
         int desiredPosition[16];
         int64_t motionStartMS[16];
         int64_t lastTickUpdate = 0;
         int convertAngleToPosition(int angle);
+        void setServoAngle(int servonum, int angle);
         long long motionStartTime[16];
     public:
         void init();
@@ -26,4 +28,4 @@ class Servo {
         void tick();
 };
 
-#endif // SERVO_SHIELD_H
+#endif // !SERVO_CONTROLLER_H
