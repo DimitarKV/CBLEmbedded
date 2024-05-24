@@ -10,11 +10,12 @@ public class ServerSync : MonoBehaviour
     void Start()
     {
         Time.timeScale = 1.0f;
-        if(simulate)
+        if (simulate)
             InvokeRepeating("SyncServer", 1, 0.2f);
     }
 
-    async void SyncServer() {
+    async void SyncServer()
+    {
         WWWForm form = new WWWForm();
         form.AddField("swing1Rotation", cube.transform.position.x.ToString());
 
@@ -24,6 +25,6 @@ public class ServerSync : MonoBehaviour
 
     void Update()
     {
-        
+
     }
 }

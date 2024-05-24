@@ -60,8 +60,10 @@
     <Analyzer Include="D:\Program Files D\Unity\Hub\Editor\2022.3.26f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Moving.cs" />
     <Compile Include="Assets\Scripts\ConveyorBelt.cs" />
     <Compile Include="Assets\Scripts\Rotation.cs" />
+    <Compile Include="Assets\Scripts\ServoPush.cs" />
     <Compile Include="Assets\Scripts\ServerSync.cs" />
   </ItemGroup>
   <ItemGroup>
