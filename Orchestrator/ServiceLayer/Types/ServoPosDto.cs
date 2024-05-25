@@ -1,7 +1,7 @@
 ﻿namespace SimulationTransferServer.Dto;
 
-public class SetServoPosDto
+public class ServoPosDto
 {
-    public byte ServoID { get; set; }
+    public byte Id { get; set; }
     public byte Angle { get; set; }
 }

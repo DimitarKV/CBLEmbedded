@@ -16,10 +16,6 @@ ServoController servoController = ServoController();
 void writeToDisplay(ModbusPacket inputPacket)
 {
   display.interpretMessage((char *)inputPacket.data);
-  if(inputPacket.data[1] == '1')
-    servoController.setAngle(0, 180, 2000);
-  else if(inputPacket.data[1] == '0')
-    servoController.setAngle(0, 90, 500);
 }
 
 void readDummySensor(ModbusPacket packet) {
@@ -28,23 +24,27 @@ void readDummySensor(ModbusPacket packet) {
 }
 
 void setServoAngle(ModbusPacket packet) {
+  if(packet.dataLength % 2 == 0) {
+    for (int i = 0; i < packet.dataLength / 2; i++)
+    {
+      servoController.setImmediateAngle(packet.data[2 * i], packet.data[2 * i + 1]);
+    }
+  }
 }
 
 void setup() {
   Serial.begin(1000000);
   display.init(135, 240, 3);
-  // driver.begin();
-  // driver.setPWMFreq(50);
-  // driver.setPWM(0, 0, 300);
   servoController.init();
-  servoController.addServo(0, 90);
+  servoController.addServo(0, 0);
+  servoController.addServo(1, 0);
+  servoController.addServo(2, 0);
   connector.addProcessor(0, *writeToDisplay);
   connector.addProcessor(2, *readDummySensor);
   connector.addProcessor(3, *setServoAngle);
-  servoController.setAngle(0, 0, 1000);
 }
 
 void loop() {
   connector.tick();
-  servoController.tick();
+  // servoController.tick();
 }

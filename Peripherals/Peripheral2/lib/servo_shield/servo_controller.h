@@ -18,13 +18,16 @@ class ServoController {
         int desiredPosition[16];
         int64_t motionStartMS[16];
         int64_t lastTickUpdate = 0;
+        int DEFAULT_SWING_DURATION = 1500;
         int convertAngleToPosition(int angle);
-        void setServoAngle(int servonum, int angle);
         long long motionStartTime[16];
     public:
         void init();
         void addServo(int servonum, int initialAngle);
         void setAngle(int servonum, int angle, int durationMS);
+        void setAngle(int servonum, int angle);
+        void setImmediateAngle(int servonum, int angle);
+        void interpretMessage(char* message);
         void tick();
 };
 
