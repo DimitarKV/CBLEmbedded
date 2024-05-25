@@ -1,4 +1,4 @@
-﻿namespace SimulationTransferServer.Dto;
+﻿namespace ServiceLayer.Types;
 
 public class ServoPosDto
 {
