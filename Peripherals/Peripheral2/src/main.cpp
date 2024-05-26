@@ -7,6 +7,7 @@
 
 ModbusConnector connector;
 Display display = Display(10, 2, 4);
+ColorSensor colorSensor;
 
 void writeToDisplay(ModbusPacket inputPacket)
 {
@@ -22,8 +23,12 @@ void setServoAngle(ModbusPacket packet) {
 }
 
 void setup() {
-  Serial.begin(1000000);
+  // Wire.setClock(400000);
+  Serial.begin(115200);
   display.init(135, 240, 3);
+  colorSensor.init();
+  // delay(2000);
+  Serial.println(colorSensor.tcs.read8(TCS34725_ID));
   connector.addProcessor(0, *writeToDisplay);
   connector.addProcessor(2, *readDummySensor);
   connector.addProcessor(3, *setServoAngle);
@@ -31,4 +36,6 @@ void setup() {
 
 void loop() {
   connector.tick();
+  colorSensor.tick();
+  // colorSensor.print();
 }

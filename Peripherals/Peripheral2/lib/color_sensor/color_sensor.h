@@ -5,19 +5,28 @@
 #include <SPI.h>
 #include "Adafruit_TCS34725.h"
 
+enum ColorSensorStatus {
+    COLOR_SENSOR_OK,
+    COLOR_SENSOR_NOT_FOUND,
+    COLOR_SENSOR_READINGS_TOO_BRIGHT,
+    COLOR_SENSOR_READINGS_TOO_DARK
+};
+
 class ColorSensor {
     private:
-    // Create an istance of the TCS34725 class
-    Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_154MS, TCS34725_GAIN_4X);
+    int integrationTime = TCS34725_INTEGRATIONTIME_154MS;
     uint16_t r, g, b, c, colorTemp, lux;
-    bool error = 0;
+    ColorSensorStatus status = COLOR_SENSOR_OK;
+    int64_t lastRead = 0;
 
     public: 
-    void sensorCheck();
-    void read();
+    Adafruit_TCS34725 tcs = Adafruit_TCS34725(integrationTime, TCS34725_GAIN_4X);
+    void init();
+    void tick();
     void print();
-    void error_check();
+    void status_check();
     void colorDetect(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
+    ColorSensorStatus getStatus();
 
     // getter methods to keep r, g, b, c private
     uint16_t getRed();
