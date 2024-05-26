@@ -42,9 +42,9 @@ public class SyncController(IRobotService robotService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetServoPos([FromForm] SetServoPosDto dto)
+    public async Task<IActionResult> SetServoPos([FromBody] List<ServoPosDto> dto)
     {
-        await robotService.SetServoPos(new SetServoPositionMessage() {ServoID = dto.ServoID, Angle = dto.Angle});
+        await robotService.SetServoPos(new SetServoPositionsMessage() {ServoParameters = dto});
         return Ok();
     }
 

@@ -11,6 +11,7 @@ private:
     uint16_t _colorSuccess = 0x07e0;
     uint16_t _colorFailure = 0xf800;
     uint16_t _colorWarning = 0xfc67;
+    bool logMode = false;
 public:
     Display(int cs, int dc, int rst) : _tft(cs, dc, rst) {
     }
@@ -47,6 +48,11 @@ public:
         }
     }
 
+    void enterLogMode() {
+        logMode = true;
+        _tft.fillScreen(_backgroundColor);
+        
+    }
 };
 
 #endif // !DISPLAY_INTERFACE_H

@@ -2,12 +2,16 @@
 #include <../lib/modbus_connector/modbus_connector.h>
 #include <../lib/color_sensor/color_sensor.h>
 #include <../lib/display_interface/display_interface.h>
+#include <../lib/servo_shield/servo_controller.h>
 #include <Adafruit_ST7789.h>
 #include <Adafruit_GFX.h>
+#include <Adafruit_PWMServoDriver.h>
+
 
 ModbusConnector connector;
 Display display = Display(10, 2, 4);
 ColorSensor colorSensor;
+ServoController servoController = ServoController();
 
 void writeToDisplay(ModbusPacket inputPacket)
 {
@@ -20,6 +24,12 @@ void readDummySensor(ModbusPacket packet) {
 }
 
 void setServoAngle(ModbusPacket packet) {
+  if(packet.dataLength % 2 == 0) {
+    for (int i = 0; i < packet.dataLength / 2; i++)
+    {
+      servoController.setImmediateAngle(packet.data[2 * i], packet.data[2 * i + 1]);
+    }
+  }
 }
 
 void setup() {
@@ -27,8 +37,10 @@ void setup() {
   Serial.begin(115200);
   display.init(135, 240, 3);
   colorSensor.init();
-  // delay(2000);
-  Serial.println(colorSensor.tcs.read8(TCS34725_ID));
+  servoController.init();
+  servoController.addServo(0, 0);
+  servoController.addServo(1, 0);
+  servoController.addServo(2, 0);
   connector.addProcessor(0, *writeToDisplay);
   connector.addProcessor(2, *readDummySensor);
   connector.addProcessor(3, *setServoAngle);
@@ -37,5 +49,5 @@ void setup() {
 void loop() {
   connector.tick();
   colorSensor.tick();
-  // colorSensor.print();
+  servoController.tick();
 }

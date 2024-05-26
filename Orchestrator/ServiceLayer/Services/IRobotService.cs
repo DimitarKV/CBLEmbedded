@@ -6,5 +6,5 @@ public interface IRobotService
 {
     Task<bool> WriteToDisplay(WriteToDisplayMessage message);
     Task<ReadDummySensorMessage> ReadDummySensor(ReadDummySensorMessage message);
-    Task SetServoPos(SetServoPositionMessage message);
+    Task SetServoPos(SetServoPositionsMessage message);
 }

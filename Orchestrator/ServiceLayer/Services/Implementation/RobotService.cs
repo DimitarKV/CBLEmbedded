@@ -24,7 +24,7 @@ public class RobotService : IRobotService
         return new ReadDummySensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }
 
-    public async Task SetServoPos(SetServoPositionMessage message)
+    public async Task SetServoPos(SetServoPositionsMessage message)
     {
         await _modbusConnector.SendModbusMessageAsync(message);
     }
