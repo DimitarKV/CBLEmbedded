@@ -1,23 +1,6 @@
 #include "color_sensor.h"
 #include "RGBConverter.h"
 
-uint16_t ColorSensor::getRed()
-{
-  return r;
-}
-uint16_t ColorSensor::getGreen()
-{
-  return g;
-}
-uint16_t ColorSensor::getBlue()
-{
-  return b;
-}
-uint16_t ColorSensor::getClear()
-{
-  return c;
-}
-
 /**
  * Checks the TCS34725 sensor. If not found, set status to 1.
  */
@@ -48,12 +31,12 @@ void ColorSensor::tick()
     lastRead = now;
     // &r returns the address of the variable r
     // tcs.getRawData(&r, &g, &b, &c); // reads raw sensor outputs
-    c = tcs.read16(TCS34725_CDATAL); // This is a non-blocking approach which directly reads
-    r = tcs.read16(TCS34725_RDATAL); // the registers of the sensor without explicitly
-    g = tcs.read16(TCS34725_GDATAL); // waiting for the integration time
-    b = tcs.read16(TCS34725_BDATAL);
-    colorTemp = tcs.calculateColorTemperature(r, g, b); // calculates the color temperature in Kelvin
-    lux = tcs.calculateLux(r, g, b);                    // calculates the lux
+    data.c = tcs.read16(TCS34725_CDATAL); // This is a non-blocking approach which directly reads
+    data.r = tcs.read16(TCS34725_RDATAL); // the registers of the sensor without explicitly
+    data.g = tcs.read16(TCS34725_GDATAL); // waiting for the integration time
+    data.b = tcs.read16(TCS34725_BDATAL);
+    data.colorTemp = tcs.calculateColorTemperature(data.r, data.g, data.b); // calculates the color temperature in Kelvin
+    data.lux = tcs.calculateLux(data.r, data.g, data.b);                    // calculates the lux
     status_check();
   }
 }
@@ -66,22 +49,22 @@ void ColorSensor::tick()
 void ColorSensor::print()
 {
   Serial.print("Color Temp: ");
-  Serial.print(colorTemp, DEC);
+  Serial.print(data.colorTemp, DEC);
   Serial.print(" K - ");
   Serial.print("Lux: ");
-  Serial.print(lux, DEC);
+  Serial.print(data.lux, DEC);
   Serial.print(" - ");
   Serial.print("R: ");
-  Serial.print(r, DEC);
+  Serial.print(data.r, DEC);
   Serial.print(" - ");
   Serial.print("G: ");
-  Serial.print(g, DEC);
+  Serial.print(data.g, DEC);
   Serial.print(" - ");
   Serial.print("B: ");
-  Serial.print(b, DEC);
+  Serial.print(data.b, DEC);
   Serial.print(" - ");
   Serial.print("C: ");
-  Serial.print(c, DEC);
+  Serial.print(data.c, DEC);
   Serial.println();
   Serial.println();
 }
@@ -127,7 +110,7 @@ void ColorSensor::colorDetect(uint16_t r, uint16_t g, uint16_t b, uint16_t c)
  */
 void ColorSensor::status_check()
 {
-  if (lux > 700)
+  if (data.lux > 700)
   { // if they put flashlight over the sensor
     status = COLOR_SENSOR_READINGS_TOO_BRIGHT;
     // Serial.println("Reduce the light");
@@ -138,7 +121,7 @@ void ColorSensor::status_check()
     // status = 0;
   }
 
-  if (lux < 25)
+  if (data.lux < 25)
   { // if they switch off the lights
     status = COLOR_SENSOR_READINGS_TOO_DARK;
     // Serial.println("It is too dark");
@@ -152,4 +135,8 @@ void ColorSensor::status_check()
 
 ColorSensorStatus ColorSensor::getStatus() {
   return status;
+}
+
+ColorSensorData ColorSensor::getData() {
+  return data;
 }

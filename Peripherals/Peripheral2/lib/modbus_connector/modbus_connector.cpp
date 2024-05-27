@@ -162,11 +162,9 @@ void ModbusConnector::sendData(byte function, byte* buffer, int length) {
     funcDataChunk[0] = function;
 
     Serial.print(":");
-    int index = 0;
-    while (funcDataChunk[index] != '\0')
+    for (int i = 0; i < length; i++)
     {
-        printHex(funcDataChunk[index]);
-        index++;
+        printHex(funcDataChunk[i]);
     }
     printHex(calculateLRC(funcDataChunk));
     Serial.print("\r\n");

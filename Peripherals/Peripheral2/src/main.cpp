@@ -16,9 +16,9 @@ void writeToDisplay(ModbusPacket inputPacket)
   display.interpretMessage((char *)inputPacket.data);
 }
 
-void readDummySensor(ModbusPacket packet) {
-  uint16_t value = 3;
-  connector.sendData(2, (byte*)&value, sizeof(value));
+void readColorSensor(ModbusPacket packet) {
+  ColorSensorData data = colorSensor.getData();  
+  connector.sendData(packet.function, (byte*)(&data), sizeof(ColorSensorData));
 }
 
 void setServoAngle(ModbusPacket packet) {
@@ -45,7 +45,7 @@ void setup() {
   servoController.addServo(4, 0);
   
   connector.addProcessor(0, *writeToDisplay);
-  connector.addProcessor(2, *readDummySensor);
+  connector.addProcessor(1, *readColorSensor);
   connector.addProcessor(3, *setServoAngle);
 }
 
