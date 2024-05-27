@@ -38,7 +38,7 @@ void setup() {
   servoController.init();
   servoController.addServo(0, 0);
   servoController.addServo(1, 0);
-  servoController.addServo(2, 0);
+  servoController.addServo(2, 100);
   connector.addProcessor(0, *writeToDisplay);
   connector.addProcessor(2, *readDummySensor);
   connector.addProcessor(3, *setServoAngle);
