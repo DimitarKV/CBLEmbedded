@@ -44,6 +44,11 @@ public class ModbusConnector : PortConnector, IModbusConnector
         return buffer;
     }
 
+    public void PurgeBuffer()
+    {
+        DiscardInBuffer();
+    }
+
     public void Read()
     {
         while (true)

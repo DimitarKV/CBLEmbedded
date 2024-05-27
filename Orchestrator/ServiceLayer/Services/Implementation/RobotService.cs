@@ -18,10 +18,11 @@ public class RobotService : IRobotService
             .SendModbusMessageAsync(message);
     }
 
-    public async Task<ReadDummySensorMessage> ReadDummySensor(ReadDummySensorMessage message)
+    public async Task<ReadColorSensorMessage> ReadColorSensorData(ReadColorSensorMessage message)
     {
+        _modbusConnector.PurgeBuffer();
         await _modbusConnector.SendModbusMessageAsync(message);
-        return new ReadDummySensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
+        return new ReadColorSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }
 
     public async Task SetServoPos(SetServoPositionsMessage message)
