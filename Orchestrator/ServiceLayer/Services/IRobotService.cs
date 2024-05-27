@@ -5,6 +5,6 @@ namespace ServiceLayer.Services;
 public interface IRobotService
 {
     Task<bool> WriteToDisplay(WriteToDisplayMessage message);
-    Task<ReadDummySensorMessage> ReadDummySensor(ReadDummySensorMessage message);
+    Task<ReadColorSensorMessage> ReadColorSensorData(ReadColorSensorMessage message);
     Task SetServoPos(SetServoPositionsMessage message);
 }

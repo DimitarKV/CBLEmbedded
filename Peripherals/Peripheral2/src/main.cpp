@@ -17,8 +17,8 @@ void writeToDisplay(ModbusPacket inputPacket)
 }
 
 void readColorSensor(ModbusPacket packet) {
-  ColorSensorData data = colorSensor.getData();  
-  connector.sendData(packet.function, (byte*)(&data), sizeof(ColorSensorData));
+  ColorSensorData data = colorSensor.getData();
+  connector.sendData(packet.function, (byte*)(&data), 12);
 }
 
 void setServoAngle(ModbusPacket packet) {

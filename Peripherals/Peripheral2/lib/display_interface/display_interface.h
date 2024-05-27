@@ -50,8 +50,11 @@ public:
 
     void enterLogMode() {
         logMode = true;
-        _tft.fillScreen(_backgroundColor);
-        
+        _tft.fillScreen(_backgroundColor);   
+    }
+
+    void println(int number) {
+        _tft.println(number);
     }
 };
 
