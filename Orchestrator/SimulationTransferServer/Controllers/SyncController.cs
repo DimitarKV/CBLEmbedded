@@ -43,4 +43,11 @@ public class SyncController(IRobotService robotService) : ControllerBase
         await robotService.SetServoPos(new SetServoPositionsMessage() {ServoParameters = dto});
         return Ok();
     }
+
+    [HttpPost]
+    public async Task<IActionResult> MoveBelt([FromBody] MoveBeltMessage message)
+    {
+        await robotService.MoveBelt(message);
+        return Ok();
+    }
 }

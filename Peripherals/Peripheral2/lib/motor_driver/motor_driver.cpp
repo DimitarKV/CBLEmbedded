@@ -9,9 +9,20 @@ MotorDriver::MotorDriver(int in1, int in2, int in3, int in4)
     _in4 = in4;
 }
 
-void MotorDriver::move(int steps)
+void MotorDriver::init() {
+    pinMode(_in1, OUTPUT);
+    pinMode(_in2, OUTPUT);
+    pinMode(_in3, OUTPUT);
+    pinMode(_in4, OUTPUT);
+}
+
+void MotorDriver::moveSteps(int steps)
 {
     remainingSteps += steps;
+}
+
+void MotorDriver::moveLength(uint16_t mm) {
+    remainingSteps += mm * calibSteps / (float)calibLengthMM;
 }
 
 void MotorDriver::tick()
@@ -27,8 +38,10 @@ void MotorDriver::tick()
         }
         else if (remainingSteps > 0)
         {
-            stepMotor(abs(remainingSteps) % 4);
+            stepMotor(3 - abs(remainingSteps) % 4);
             remainingSteps--;
+        } else {
+            stepMotor(4);
         }
     }
 }
@@ -63,6 +76,12 @@ void MotorDriver::stepMotor(int thisStep)
         digitalWrite(_in2, LOW);
         digitalWrite(_in3, LOW);
         digitalWrite(_in4, HIGH);
+        break;
+    case 4: // 1001
+        digitalWrite(_in1, LOW);
+        digitalWrite(_in2, LOW);
+        digitalWrite(_in3, LOW);
+        digitalWrite(_in4, LOW);
         break;
     }
 }
