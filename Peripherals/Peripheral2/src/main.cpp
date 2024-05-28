@@ -53,9 +53,9 @@ void setup() {
   // motorDriver.moveSteps(1000);
 
   servoController.init();
-  servoController.addServo(0, 0);
+  servoController.addServo(0, 180);
   servoController.addServo(1, 0);
-  servoController.addServo(2, 100);
+  servoController.addServo(2, 0);
   servoController.addServo(3, 0);
   servoController.addServo(4, 0);
   
