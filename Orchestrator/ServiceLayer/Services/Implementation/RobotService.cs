@@ -18,10 +18,10 @@ public class RobotService : IRobotService
             .SendModbusMessageAsync(message);
     }
 
-    public async Task<ReadColorSensorMessage> ReadColorSensorData(ReadColorSensorMessage message)
+    public async Task<ReadColorSensorMessage> ReadColorSensorData()
     {
         _modbusConnector.PurgeBuffer();
-        await _modbusConnector.SendModbusMessageAsync(message);
+        await _modbusConnector.SendModbusMessageAsync(new ReadColorSensorMessage());
         return new ReadColorSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }
 
@@ -33,5 +33,12 @@ public class RobotService : IRobotService
     public async Task MoveBelt(MoveBeltMessage message)
     {
         await _modbusConnector.SendModbusMessageAsync(message);
+    }
+
+    public async Task<ReadDepthSensorMessage> ReadDepthSensorMessage()
+    {
+        _modbusConnector.PurgeBuffer();
+        await _modbusConnector.SendModbusMessageAsync(new ReadDepthSensorMessage());
+        return new ReadDepthSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }
 }

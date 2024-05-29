@@ -33,7 +33,7 @@ public class SyncController(IRobotService robotService) : ControllerBase
 
     public async Task<IActionResult> ReadColorSensor()
     {
-        var message = await robotService.ReadColorSensorData(new ReadColorSensorMessage());
+        var message = await robotService.ReadColorSensorData();
         return Ok(message);
     }
 
@@ -49,5 +49,12 @@ public class SyncController(IRobotService robotService) : ControllerBase
     {
         await robotService.MoveBelt(message);
         return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ReadDepthSensor()
+    {
+        var result = await robotService.ReadDepthSensorMessage();
+        return Ok(result);
     }
 }
