@@ -71,6 +71,7 @@ void setup() {
   connector.addProcessor(2, *moveBelt);
   connector.addProcessor(3, *setServoAngle);
   connector.addProcessor(4, *readDepthSensor);
+
 }
 
 void loop() {

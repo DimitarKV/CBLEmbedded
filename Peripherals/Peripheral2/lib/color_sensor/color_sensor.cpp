@@ -6,7 +6,7 @@
  */
 void ColorSensor::init()
 {
-  Wire1.setPins(15, 16);
+  Wire1.setPins(21, 1);
   if (!tcs.begin(TCS34725_ADDRESS, &Wire1))
   {
     status = COLOR_SENSOR_NOT_FOUND;
