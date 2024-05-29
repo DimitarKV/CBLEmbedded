@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "I42Cc22BDSPUR2lcBJXYTrAcZ/gkI4VGo3zaJNJ7PD4kSw2Q1ex3DdMyiP01wvQVMMkzh1epOxkoOUTIbD/yIQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\kings\\Desktop\\Embedded Systems\\Group Assignment\\soundplaying\\soundplaying.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\kings\\.nuget\\packages\\netcoreaudio\\2.0.0\\netcoreaudio.2.0.0.nupkg.sha512",
+    "C:\\Users\\kings\\.nuget\\packages\\system.device.gpio\\3.1.0\\system.device.gpio.3.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}
