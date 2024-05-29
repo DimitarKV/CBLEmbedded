@@ -18,8 +18,8 @@ struct ColorSensorData {
 
 class ColorSensor {
 private:
-    int integrationTime = TCS34725_INTEGRATIONTIME_154MS;
-    Adafruit_TCS34725 tcs = Adafruit_TCS34725(integrationTime, TCS34725_GAIN_4X);
+    int integrationTime = TCS34725_INTEGRATIONTIME_300MS;
+    Adafruit_TCS34725 tcs = Adafruit_TCS34725(integrationTime, TCS34725_GAIN_16X);
     
     ColorSensorData data;
     ColorSensorStatus status = COLOR_SENSOR_OK;

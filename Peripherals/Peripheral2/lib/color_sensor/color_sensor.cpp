@@ -83,6 +83,7 @@ void ColorSensor::print()
  */
 void ColorSensor::colorDetect(uint16_t r, uint16_t g, uint16_t b, uint16_t c)
 {
+  
   RGBConverter rgb;
   float hsv[3];
   rgb.rgbToHsv(r, g, b, hsv);
