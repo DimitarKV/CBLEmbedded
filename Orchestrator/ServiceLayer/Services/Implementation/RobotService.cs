@@ -12,8 +12,16 @@ public class RobotService : IRobotService
         _modbusConnector = modbusConnector;
     }
 
+    public void Deconstruct(out IModbusConnector modbusConnector)
+    {
+        _modbusConnector.PurgeBuffer();
+        _modbusConnector.Close();
+        modbusConnector = _modbusConnector;
+    }
+
     public async Task<bool> WriteToDisplay(WriteToDisplayMessage message)
     {
+        _modbusConnector.PurgeBuffer();
         return await _modbusConnector
             .SendModbusMessageAsync(message);
     }

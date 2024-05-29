@@ -25,4 +25,5 @@ public interface IModbusConnector
     void PurgeBuffer();
     void Read();
     bool CanRead();
+    void Close();
 }
