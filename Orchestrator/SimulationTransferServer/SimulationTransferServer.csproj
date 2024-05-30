@@ -17,6 +17,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Modbus\Modbus.csproj" />
+      <ProjectReference Include="..\Orchestrator.RobotWorker\Orchestrator.RobotWorker.csproj" />
       <ProjectReference Include="..\ServiceLayer\ServiceLayer.csproj" />
     </ItemGroup>
 

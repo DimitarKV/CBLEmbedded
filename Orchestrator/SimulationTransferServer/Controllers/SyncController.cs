@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Services;
 using ServiceLayer.Types;
 using SimulationTransferServer.Dto;
@@ -56,5 +55,30 @@ public class SyncController(IRobotService robotService) : ControllerBase
     {
         var result = await robotService.ReadDepthSensorMessage();
         return Ok(result);
+    }
+
+    public Task Worker { get; set; }
+    public CancellationTokenSource Token { get; set; }
+    [HttpGet]
+    public async Task<IActionResult> StartService()
+    {
+        Token = new CancellationTokenSource();
+        Worker = new Task(() =>
+        {
+            while (!Token.IsCancellationRequested)
+            {
+                Console.WriteLine("Here");
+            }
+        }, Token.Token);
+
+        Worker.Start();
+        return Ok();
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> StopService()
+    {
+        Token.Cancel();
+        return Ok();
     }
 }
