@@ -11,7 +11,7 @@ public class Servo2Push : MonoBehaviour
 
     Vector3 direction;
 
-    private bool triggered = false;
+    public static bool triggered2 = false;
 
     // Start is called before the first frame update
     void Start()
@@ -22,7 +22,7 @@ public class Servo2Push : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (triggered)
+        if (triggered2)
         {
             moveCubeFront();
         }
@@ -36,10 +36,12 @@ public class Servo2Push : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("OLOLOLO");
         if (!other.CompareTag("Trash"))
         {
-            triggered = true;
+            if (Container2.weight2 <= Container1.weight1 && Container2.weight2 <= Container3.weight3)
+            {
+                triggered2 = true;
+            }
         }
     }
     private void moveCubeFront()
@@ -48,7 +50,7 @@ public class Servo2Push : MonoBehaviour
         cube.transform.position += direction * speed * Time.deltaTime;
         if (Vector3.Distance(cube.transform.position, targetPos) <= 0.1f)
         {
-            triggered = false;
+            triggered2 = false;
         }
     }
 

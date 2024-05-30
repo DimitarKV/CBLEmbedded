@@ -4,25 +4,56 @@ using UnityEngine;
 
 public class ObjectDetect : MonoBehaviour
 {
-    public GameObject[] servoTriggers;
+    public Vector3 targetPos;
+    public Vector3 initialPos;
+    public float speed;
+    public GameObject cube;
+
+    Vector3 direction;
+
+    public static bool triggered = false;
+
+    // Update is called once per frame
     void Update()
     {
-        
-    }
+        if (triggered)
+        {
+            if (ObjectHandling.handling == false)
+            {
+                moveCubeBack();
+            }
+            else
+            {
+                moveCubeFront();
+            }
+        }
+        else
+        {
+            moveCubeFront();
+        }
 
+        //moveCubeBack();
+        //triggered = false;
+    }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Trash"))
+        triggered = true;
+    }
+    private void moveCubeBack()
+    {
+        Debug.Log("back");
+        direction = (targetPos - cube.transform.position).normalized;
+        cube.transform.position += direction * speed * Time.deltaTime;
+        if (Vector3.Distance(cube.transform.position, targetPos) <= 0.1f)
         {
-            Debug.Log("Trash");
-        } 
-        else if (other.CompareTag("White"))
-        {
-            Debug.Log("White");
+            triggered = false;
         }
-        else if (other.CompareTag("Black"))
-        {
-            Debug.Log("Black");
-        }
+    }
+
+    private void moveCubeFront()
+    {
+        Debug.Log("front");
+        direction = (initialPos - cube.transform.position).normalized;
+        cube.transform.position += direction * speed * Time.deltaTime;
     }
 }

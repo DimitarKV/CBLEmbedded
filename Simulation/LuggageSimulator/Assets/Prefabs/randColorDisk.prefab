@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 1070346645947739995}
   - component: {fileID: 7673505653139788904}
   m_Layer: 0
-  m_Name: whiteDisk
+  m_Name: randColorDisk
   m_TagString: White
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5436,8 +5436,7 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: ed129b5f5a870444d838f3101a246c31, type: 2}
+  m_Materials: []
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
