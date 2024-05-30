@@ -10,10 +10,6 @@ namespace SimulationTransferServer.Controllers;
 [Route("/[controller]/[action]")]
 public class SyncController(IRobotService robotService) : ControllerBase
 {
-    private static float averageResponseTime = 0;
-    private static int nMeasurements = 0;
-    private static int totalComputingTimeMs = 0;
-
     [HttpPost]
     public async Task<IActionResult> All([FromForm] SyncAllDto dto)
     {
@@ -35,39 +31,30 @@ public class SyncController(IRobotService robotService) : ControllerBase
         return Ok();
     }
 
-    public async Task<IActionResult> ReadDummySensor()
+    public async Task<IActionResult> ReadColorSensor()
     {
-        var message = await robotService.ReadDummySensor(new ReadDummySensorMessage());
+        var message = await robotService.ReadColorSensorData();
         return Ok(message);
     }
 
     [HttpPost]
-    public async Task<IActionResult> SetServoPos([FromForm] SetServoPosDto dto)
+    public async Task<IActionResult> SetServoPos([FromBody] List<ServoPosDto> dto)
     {
-        await robotService.SetServoPos(new SetServoPositionMessage() {ServoID = dto.ServoID, Angle = dto.Angle});
+        await robotService.SetServoPos(new SetServoPositionsMessage() {ServoParameters = dto});
         return Ok();
     }
 
-    //Average response time: 4381.6523us (40000 measurements) over 27116ms
-    public async Task<IActionResult> Test()
+    [HttpPost]
+    public async Task<IActionResult> MoveBelt([FromBody] MoveBeltMessage message)
     {
-        Stopwatch sw1 = new Stopwatch();
-        Stopwatch sw2 = new Stopwatch();
-        sw1.Start();
-        for (int i = 0; i < 10; i++)
-        {
-            sw2.Reset();
-            sw2.Start();
-            robotService.ReadDummySensor(new ReadDummySensorMessage()).Wait();
-            sw2.Stop();
-            averageResponseTime = (averageResponseTime * nMeasurements++ + (sw2.Elapsed.Milliseconds * 1000 + sw2.Elapsed.Microseconds)) / nMeasurements;
-        }
-        sw1.Stop();
+        await robotService.MoveBelt(message);
+        return Ok();
+    }
 
-        totalComputingTimeMs += sw1.Elapsed.Minutes * 60 * 1000 + sw1.Elapsed .Seconds * 1000 + sw1.Elapsed.Milliseconds;
-        
-        Console.WriteLine("Average response time: {0}us ({1} measurements) over {2}ms", averageResponseTime, nMeasurements, totalComputingTimeMs);
-        var message = await robotService.ReadDummySensor(new ReadDummySensorMessage());
-        return Ok(message);
+    [HttpGet]
+    public async Task<IActionResult> ReadDepthSensor()
+    {
+        var result = await robotService.ReadDepthSensorMessage();
+        return Ok(result);
     }
 }

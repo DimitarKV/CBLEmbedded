@@ -29,8 +29,7 @@ private:
 
     int extractNullTerminatedLength(char* buffer);
     // Buffer must be null-terminated
-    byte calculateLRC(char* buffer);
-    byte calculateLRC(char* buffer, int length);
+    byte calculateLRC(byte* buffer, int length);
     byte calculateLRCFromHex(char* buffer, int length);
     bool serialRead();
     // Buffer must be null-terminated

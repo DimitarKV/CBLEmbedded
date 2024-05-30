@@ -19,6 +19,7 @@ public class PortConnector : SerialPort
     {
         Open();
         Write(":?:?aAbBcC\r\n");
+        DiscardInBuffer();
     }
 
     public async Task<byte> ReadByteFromStreamAsync()
