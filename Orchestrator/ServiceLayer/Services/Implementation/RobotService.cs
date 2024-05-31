@@ -14,21 +14,21 @@ public class RobotService : IRobotService
 
     public void Deconstruct(out IModbusConnector modbusConnector)
     {
-        _modbusConnector.PurgeBuffer();
+        _modbusConnector.PurgeBuffers();
         _modbusConnector.Close();
         modbusConnector = _modbusConnector;
     }
 
     public async Task<bool> WriteToDisplay(WriteToDisplayMessage message)
     {
-        _modbusConnector.PurgeBuffer();
+        _modbusConnector.PurgeBuffers();
         return await _modbusConnector
             .SendModbusMessageAsync(message);
     }
 
     public async Task<ReadColorSensorMessage> ReadColorSensorData()
     {
-        _modbusConnector.PurgeBuffer();
+        _modbusConnector.PurgeBuffers();
         await _modbusConnector.SendModbusMessageAsync(new ReadColorSensorMessage());
         return new ReadColorSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }
@@ -45,7 +45,7 @@ public class RobotService : IRobotService
 
     public async Task<ReadDepthSensorMessage> ReadDepthSensorMessage()
     {
-        _modbusConnector.PurgeBuffer();
+        _modbusConnector.PurgeBuffers();
         await _modbusConnector.SendModbusMessageAsync(new ReadDepthSensorMessage());
         return new ReadDepthSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }

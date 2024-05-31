@@ -22,7 +22,7 @@ public interface IModbusConnector
     /// <returns>Whether the operation was successful</returns>
     Task<bool> SendModbusMessageAsync(IModbusSerializable serializable);
     Task<byte[]> ReadModbusMessageAsync();
-    void PurgeBuffer();
+    void PurgeBuffers();
     void Read();
     bool CanRead();
     void Close();

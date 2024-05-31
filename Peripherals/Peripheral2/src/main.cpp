@@ -22,6 +22,17 @@ ServoController servoController = ServoController();
 MotorDriver motorDriver(STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
 DepthSensor depthSensor;
 
+
+TaskHandle_t HandleConnectorTaskHandle;
+void HandleConnector(void* parameter) {
+  while (true)
+  {
+    connector.tick();
+    motorDriver.tick();
+  }
+}
+
+
 void writeToDisplay(ModbusPacket inputPacket)
 {
   display.interpretMessage((char *)inputPacket.data);
@@ -51,8 +62,15 @@ void moveBelt(ModbusPacket packet) {
   motorDriver.moveLength(*distance);
 }
 
+bool report = false;
+void reportTimes(ModbusPacket packet) {
+  report = true;
+}
+
 void setup() {
   Serial.begin(1000000);
+  Serial1.begin(115200);
+  Serial1.println("Here");
   
   display.init(135, 240, 3);
   colorSensor.init();
@@ -71,14 +89,57 @@ void setup() {
   connector.addProcessor(2, *moveBelt);
   connector.addProcessor(3, *setServoAngle);
   connector.addProcessor(4, *readDepthSensor);
+  connector.addProcessor(5, *reportTimes);
 
+  xTaskCreatePinnedToCore(
+    HandleConnector,
+    "Connector handler",
+    10000,
+    NULL,
+    0,
+    &HandleConnectorTaskHandle,
+    0
+  );
 }
+uint64_t connectorBegin = 0;
+uint64_t colorSensorBegin = 0;
+uint64_t servoControllerBegin = 0;
+uint64_t motorDriverBegin = 0;
+uint64_t depthSensorBegin = 0;
+uint64_t endOp = 0;
+
 
 void loop() {
-  connector.tick();
-  colorSensor.tick();
-  servoController.tick();
-  motorDriver.tick();
-  depthSensor.tick();
+  connectorBegin = esp_timer_get_time();
+
+  colorSensorBegin = esp_timer_get_time();
+  colorSensor.tick(); // TODO: This takes 3ms 
+
+  // servoControllerBegin = esp_timer_get_time();
+  // servoController.tick();
+
+  motorDriverBegin = esp_timer_get_time();
+  // motorDriver.tick();
+
+  depthSensorBegin = esp_timer_get_time();
+  depthSensor.tick(); // TODO: Apparently takes around 15ms needs optimisation
+
+  endOp = esp_timer_get_time();
+
+  if(report) {
+    Serial1.print("Connector tick took: ");
+    Serial1.println(colorSensorBegin - connectorBegin);
+
+    Serial1.print("Color sensor tick took: ");
+    Serial1.println(motorDriverBegin - colorSensorBegin);
+
+    Serial1.print("Motor tick took: ");
+    Serial1.println(depthSensorBegin - motorDriverBegin);
+
+    Serial1.print("Depth sensor tick took: ");
+    Serial1.println(endOp - depthSensorBegin);
+    report = false;
+
+  }
   // colorSensor.print();
 }
