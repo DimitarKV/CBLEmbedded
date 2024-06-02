@@ -9,4 +9,5 @@ public interface IRobotService
     Task SetServoPos(SetServoPositionsMessage message);
     Task MoveBelt(MoveBeltMessage message);
     Task<ReadDepthSensorMessage> ReadDepthSensorMessage();
+    Task ToggleReportTimes();
 }

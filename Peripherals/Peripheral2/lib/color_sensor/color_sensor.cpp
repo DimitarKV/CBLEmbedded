@@ -21,12 +21,12 @@ void ColorSensor::init()
  */
 void ColorSensor::tick()
 {
-  int64_t now = esp_timer_get_time();
+  uint64_t now = esp_timer_get_time();
   if(status == COLOR_SENSOR_NOT_FOUND) {
     // init();
     return;
   }
-  if (now - lastRead >= integrationTime)
+  if (now - lastRead >= integrationTime * 1000)
   {
     lastRead = now;
     // &r returns the address of the variable r

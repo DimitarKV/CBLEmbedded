@@ -49,4 +49,9 @@ public class RobotService : IRobotService
         await _modbusConnector.SendModbusMessageAsync(new ReadDepthSensorMessage());
         return new ReadDepthSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
     }
+
+    public async Task ToggleReportTimes()
+    {
+        await _modbusConnector.SendModbusMessageAsync(new ToggleReportTimesMessage());
+    }
 }

@@ -10,6 +10,8 @@ class DepthSensor
 {
 private:
     byte lastReading;
+    uint64_t lastReadingTime;
+    uint64_t readingPeriodUs = 20000;
     bool readingInProgress = false;
     Adafruit_VL6180X vl = Adafruit_VL6180X();
 public:

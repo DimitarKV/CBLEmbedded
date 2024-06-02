@@ -9,10 +9,12 @@ byte DepthSensor::getLastReading(){
 }
 
 void DepthSensor::tick(){
+    uint64_t now = esp_timer_get_time();
     if(!readingInProgress){
         vl.startRange();
         readingInProgress = true;
-    } else if(vl.isRangeComplete()){
+    } else if(now - lastReadingTime >= readingPeriodUs && vl.isRangeComplete()){
+        lastReadingTime = now;
         lastReading = vl.readRangeResult();
         vl.startRange();
     }

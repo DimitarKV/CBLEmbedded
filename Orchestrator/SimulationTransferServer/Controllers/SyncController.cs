@@ -57,4 +57,11 @@ public class SyncController(IRobotService robotService) : ControllerBase
         var result = await robotService.ReadDepthSensorMessage();
         return Ok(result);
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> ReportTimes()
+    {
+        await robotService.ToggleReportTimes();
+        return Ok();
+    }
 }
