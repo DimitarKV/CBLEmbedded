@@ -24,7 +24,8 @@ if ( app.Environment.IsDevelopment())
 }
 
 var robotService = app.Services.GetService<IRobotService>();
-await robotService!.WriteToDisplay(new WriteToDisplayMessage("Welcome to Mark I"));
+// Thread.Sleep(1000);
+await robotService!.WriteToDisplay(new WriteToDisplayMessage("w0Welcome to Mark I"));
 
 app.UseHttpsRedirection();
 app.MapControllers();

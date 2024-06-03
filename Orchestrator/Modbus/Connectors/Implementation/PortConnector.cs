@@ -18,9 +18,18 @@ public class PortConnector : SerialPort
     public void OpenAndPurge()
     {
         Open();
-        Write(":?:?aAbBcC\r\n");
+        Write("aAbBcC\r\n");
+        // Thread.Sleep(1000);
+        DiscardInBuffer();
     }
 
+    public async Task<int> ReadToBufferAsync(byte[] buffer, int offset)
+    {
+        if(BytesToRead > 0)
+            return await BaseStream.ReadAsync(buffer, offset, 1024, CancellationToken.None);
+        return 0;
+    }
+    
     public async Task<byte> ReadByteFromStreamAsync()
     {
         Task waitBytesOnBuffer = new Task(() =>
