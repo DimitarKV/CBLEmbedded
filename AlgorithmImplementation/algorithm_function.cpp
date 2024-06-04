@@ -1,6 +1,6 @@
 #include <iostream>
 using namespace std;
-const int MAX_WEIGHT = 60;
+const int MAX_WEIGHT = 40;
 int nextBin(char color, int firstWeight, int secondWeight, int thirdWeight)
 {
     int currentWeight;
