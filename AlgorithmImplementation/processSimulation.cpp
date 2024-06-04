@@ -1,6 +1,6 @@
 #include <iostream>
 using namespace std;
-const int MAX_WEIGHT = 60;
+const int MAX_WEIGHT = 40;
 int currentWeights[3] = {0, 0, 0};
 bool flag = true;
 
