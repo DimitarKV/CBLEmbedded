@@ -21,7 +21,7 @@ void MotorDriver::moveSteps(int steps)
     remainingSteps += steps;
 }
 
-void MotorDriver::moveLength(uint16_t mm) {
+void MotorDriver::moveLength(int mm) {
     remainingSteps += mm * calibSteps / (float)calibLengthMM;
 }
 
