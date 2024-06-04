@@ -38,7 +38,17 @@ public class RobotService : IRobotService
         await _modbusConnector.SendModbusMessageAsync(message);
     }
 
+    public async Task SetServoProgressions(SetServoProgressionsMessage message)
+    {
+        await _modbusConnector.SendModbusMessageAsync(message);
+    }
+
     public async Task MoveBelt(MoveBeltMessage message)
+    {
+        await _modbusConnector.SendModbusMessageAsync(message);
+    }
+
+    public async Task MoveBelt(MoveBeltContinuousMessage message)
     {
         await _modbusConnector.SendModbusMessageAsync(message);
     }

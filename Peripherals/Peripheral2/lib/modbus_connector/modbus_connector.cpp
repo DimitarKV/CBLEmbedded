@@ -100,10 +100,10 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
 
 void ModbusConnector::processModbusCommand(ModbusPacket packet) {
     if(packet.isValid) {
-        Serial.println("ACK");
-        Serial1.println("Send: ACK");
         if(this->processors[packet.function] != nullptr)
             this->processors[packet.function](packet);
+        Serial.println("ACK");
+        Serial1.println("Send: ACK");
         Serial1.print("Time to process request: ");
         Serial1.println(esp_timer_get_time() - packetReceive);
 

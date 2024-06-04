@@ -11,7 +11,7 @@ builder.Logging.AddConsole();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
-builder.AddExtensions();
+builder.AddSTSExtensions();
 builder.AddModbusExtensions();
 
 var app = builder.Build();
