@@ -81,8 +81,9 @@ void setServoAngle(ModbusPacket packet)
 
 void moveBelt(ModbusPacket packet)
 {
-  uint16_t *distance = (uint16_t *)(&packet.data);
+  short *distance = (short *)(&packet.data);
   motorDriver.moveLength(*distance);
+  
 }
 
 void reportTimes(ModbusPacket packet)
@@ -102,11 +103,10 @@ void setup()
   servoController.init();
   depthSensor.init();
 
-  servoController.addServo(0, 180);
-  servoController.addServo(1, 0);
-  servoController.addServo(2, 0);
-  servoController.addServo(3, 0);
-  servoController.addServo(4, 0);
+  servoController.addServo(0, 170);
+  servoController.addServo(1, 170);
+  servoController.addServo(2, 170);
+  servoController.addServo(3, 170);
 
   connector.addProcessor(0, *writeToDisplay);
   connector.addProcessor(1, *readColorSensor);

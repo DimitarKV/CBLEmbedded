@@ -17,7 +17,7 @@ public:
    void init();
    void stepMotor(int thisStep);
    void moveSteps(int steps);
-   void moveLength(uint16_t mm);
+   void moveLength(int mm);
    void tick();
 };
 
