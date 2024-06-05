@@ -22,15 +22,15 @@ public class RobotService : IRobotService
     public async Task<bool> WriteToDisplay(WriteToDisplayMessage message)
     {
         _modbusConnector.PurgeBuffers();
-        return await _modbusConnector
+        await _modbusConnector
             .SendModbusMessageAsync(message);
+        return true;
     }
 
     public async Task<ReadColorSensorMessage> ReadColorSensorData()
     {
         _modbusConnector.PurgeBuffers();
-        await _modbusConnector.SendModbusMessageAsync(new ReadColorSensorMessage());
-        return new ReadColorSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
+        return new ReadColorSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync(new ReadColorSensorMessage()));
     }
 
     public async Task SetServoPos(SetServoPositionsMessage message)
@@ -48,16 +48,25 @@ public class RobotService : IRobotService
         await _modbusConnector.SendModbusMessageAsync(message);
     }
 
+    public async Task MoveBeltSteps(MoveBeltStepsMessage message)
+    {
+        await _modbusConnector.SendModbusMessageAsync(message);
+    }
+
     public async Task MoveBelt(MoveBeltContinuousMessage message)
     {
         await _modbusConnector.SendModbusMessageAsync(message);
     }
 
+    public async Task<ReadMotorStateMessage> IsMotorMoving()
+    {
+        return new ReadMotorStateMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync(new ReadMotorStateMessage()));
+    }
+
     public async Task<ReadDepthSensorMessage> ReadDepthSensorMessage()
     {
         _modbusConnector.PurgeBuffers();
-        await _modbusConnector.SendModbusMessageAsync(new ReadDepthSensorMessage());
-        return new ReadDepthSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync());
+        return new ReadDepthSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync(new ReadDepthSensorMessage()));
     }
 
     public async Task ToggleReportTimes()

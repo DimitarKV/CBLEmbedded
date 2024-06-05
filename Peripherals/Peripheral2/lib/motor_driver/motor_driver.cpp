@@ -25,6 +25,14 @@ void MotorDriver::moveLength(int mm) {
     remainingSteps += mm * calibSteps / (float)calibLengthMM;
 }
 
+void MotorDriver::moveContinuous(bool running) {
+    autoRun = running;
+}
+
+bool MotorDriver::isMoving() {
+    return remainingSteps != 0;
+}
+
 void MotorDriver::tick()
 {
     uint64_t now = esp_timer_get_time();
@@ -41,7 +49,10 @@ void MotorDriver::tick()
             stepMotor(3 - abs(remainingSteps) % 4);
             remainingSteps--;
         } else {
-            stepMotor(4);
+            if(autoRun)
+                remainingSteps = 4;
+            else
+                stepMotor(4);
         }
     }
 }

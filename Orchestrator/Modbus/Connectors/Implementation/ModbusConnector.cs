@@ -22,7 +22,7 @@ public class ModbusConnector : PortConnector, IModbusConnector
         OpenAndPurge();
     }
     
-    public async Task<bool> SendModbusMessageAsync(IModbusSerializable serializable)
+    public async Task<string> SendModbusMessageAsync(IModbusSerializable serializable)
     {
         byte[] funcDataChunk = serializable.toByteArray();
         var start = ":";
@@ -33,9 +33,9 @@ public class ModbusConnector : PortConnector, IModbusConnector
         return await TrySendAsync(message);
     }
 
-    public async Task<byte[]> ReadModbusMessageAsync()
+    public async Task<byte[]> ReadModbusMessageAsync(IModbusSerializable serializable)
     {
-        string modbusChunk = await ReadCrLfLineFromStreamAsync();
+        string modbusChunk = await SendModbusMessageAsync(serializable);
         string dataChunk = modbusChunk.Substring(3, modbusChunk.Length - 5);
         byte[] buffer = new byte[dataChunk.Length/2];
         for (int i = 0; i < dataChunk.Length; i+=2)
@@ -85,7 +85,7 @@ public class ModbusConnector : PortConnector, IModbusConnector
         return calculatedLrc;
     }
 
-    private async Task<bool> TrySendAsync(string data)
+    private async Task<string> TrySendAsync(string data)
     {
         for (var i = 0; i < _retries + 1; i++)
         {
@@ -111,10 +111,11 @@ public class ModbusConnector : PortConnector, IModbusConnector
                 _logger.LogInformation("Operation took: {0}ms", watch.Elapsed.Milliseconds);
             }
             _logger.LogInformation("Received: {0}", ack);
-            if (ack == "ACK") return true;
+            if (ack.Substring(ack.Length - 3, 3) == "ACK") 
+                return ack.Substring(0, ack.Length - 3);
             _logger.LogError("ACK packet receive unsuccessful, retrying!");
         }
-        return false;
+        throw new IOException("Could not complete modbus message");
     }
 
     private async Task<byte> ReadByteWithTimeoutAsync()

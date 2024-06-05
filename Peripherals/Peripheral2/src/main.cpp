@@ -22,32 +22,13 @@ ServoController servoController = ServoController();
 MotorDriver motorDriver(STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
 DepthSensor depthSensor;
 
-bool report = false;
-
-
 TaskHandle_t HandleConnectorTaskHandle;
 void HandleConnector(void *parameter)
 {
   while (true)
   {
     connector.tick();
-    // uint64_t motorStart = esp_timer_get_time();
     motorDriver.tick();
-    // uint64_t motorEnd = esp_timer_get_time();
-
-    // if (!report)
-    // {
-    //   // Serial1.write(27);
-    //   // Serial1.write('[');
-    //   // Serial1.write('2');
-    //   // Serial1.write('J');
-    //   Serial1.write(27);
-    //   Serial1.write('[');
-    //   Serial1.write('H');
-    //   Serial1.print("Motor tick took: ");
-    //   Serial1.print(motorEnd - motorStart);
-    //   Serial1.println("     ");
-    // }
   }
 }
 
@@ -78,14 +59,11 @@ void setServoAngles(ModbusPacket packet)
 
 void setServoProgressions(ModbusPacket packet)
 {
+  Serial1.println(packet.dataLength);
   if (packet.dataLength % 2 == 0)
   {
     servoController.setServoProgressions(packet.data, packet.dataLength);
   }
-}
-
-void setPiston(ModbusPacket packet) {
-
 }
 
 void moveBelt(ModbusPacket packet)
@@ -95,9 +73,23 @@ void moveBelt(ModbusPacket packet)
   
 }
 
-void reportTimes(ModbusPacket packet)
+void moveBeltSteps(ModbusPacket packet) {
+  short *steps = (short *)(&packet.data);
+  motorDriver.moveSteps(*steps);
+
+}
+
+void moveBeltContinuous(ModbusPacket packet)
 {
-  report = !report;
+  if(packet.data[0] == 0)
+    motorDriver.moveContinuous(false);
+  else if(packet.data[0] == 1)
+    motorDriver.moveContinuous();
+}
+
+void isMotorMoving(ModbusPacket packet) {
+  bool isMoving = motorDriver.isMoving();
+  connector.sendData(packet.function, (byte*)&isMoving, 1);
 }
 
 void setup()
@@ -112,7 +104,7 @@ void setup()
   servoController.init();
   depthSensor.init();
 
-  servoController.addServo(0, 100, 10);
+  servoController.addServo(0, 100, 50);
   servoController.addServo(1, 170, 10);
   servoController.addServo(2, 170, 10);
   servoController.addServo(3, 170, 10);
@@ -122,8 +114,10 @@ void setup()
   connector.addProcessor(2, *moveBelt);
   connector.addProcessor(3, *setServoAngles);
   connector.addProcessor(4, *readDepthSensor);
-  connector.addProcessor(5, *reportTimes);
   connector.addProcessor(6, *setServoProgressions);
+  connector.addProcessor(7, *moveBeltContinuous);
+  connector.addProcessor(8, *moveBeltSteps);
+  connector.addProcessor(9, *isMotorMoving);
 
   xTaskCreatePinnedToCore(
       HandleConnector,
@@ -134,56 +128,9 @@ void setup()
       &HandleConnectorTaskHandle,
       0);
 }
-uint64_t connectorBegin = 0;
-uint64_t colorSensorBegin = 0;
-uint64_t servoControllerBegin = 0;
-uint64_t motorDriverBegin = 0;
-uint64_t depthSensorBegin = 0;
-uint64_t endOp = 0;
 
 void loop()
 {
-  connectorBegin = esp_timer_get_time();
-
-  colorSensorBegin = esp_timer_get_time();
   colorSensor.tick();
-
-  // servoControllerBegin = esp_timer_get_time();
-  // servoController.tick();
-
-  motorDriverBegin = esp_timer_get_time();
-  // motorDriver.tick();
-
-  depthSensorBegin = esp_timer_get_time();
   depthSensor.tick();
-
-  endOp = esp_timer_get_time();
-
-  if (report)
-  {
-    // Serial1.write(27);
-    // Serial1.write('[');
-    // Serial1.write('2');
-    // Serial1.write('J');
-    Serial1.write(27);
-    Serial1.write('[');
-    Serial1.write('H');
-    Serial1.print("Connector tick took: ");
-    Serial1.print(colorSensorBegin - connectorBegin);
-    Serial1.println("    ");
-
-    Serial1.print("Color sensor tick took: ");
-    Serial1.print(motorDriverBegin - colorSensorBegin);
-    Serial1.println("    ");
-
-    Serial1.print("Motor tick took: ");
-    Serial1.print(depthSensorBegin - motorDriverBegin);
-    Serial1.println("    ");
-
-    Serial1.print("Depth sensor tick took: ");
-    Serial1.print(endOp - depthSensorBegin);
-    Serial1.println("    ");
-    // report = false;
-  }
-  // colorSensor.print();
 }

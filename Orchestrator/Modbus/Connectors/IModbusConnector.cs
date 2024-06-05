@@ -20,8 +20,8 @@ public interface IModbusConnector
     /// <param name="function">A unique operation code</param>
     /// <param name="data">To send in the packet</param>
     /// <returns>Whether the operation was successful</returns>
-    Task<bool> SendModbusMessageAsync(IModbusSerializable serializable);
-    Task<byte[]> ReadModbusMessageAsync();
+    Task<string> SendModbusMessageAsync(IModbusSerializable serializable);
+    Task<byte[]> ReadModbusMessageAsync(IModbusSerializable serializable);
     void PurgeBuffers();
     void Read();
     bool CanRead();

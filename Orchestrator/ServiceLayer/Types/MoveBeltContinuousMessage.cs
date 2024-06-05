@@ -4,7 +4,7 @@ namespace ServiceLayer.Types;
 
 public class MoveBeltContinuousMessage : IModbusSerializable
 {
-    public byte Function { get; set; } = 6;
+    public byte Function { get; set; } = 7;
     public bool Running { get; set; } = false;
     public byte[] toByteArray()
     {
