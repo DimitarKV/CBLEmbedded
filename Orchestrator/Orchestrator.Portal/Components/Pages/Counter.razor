@@ -34,13 +34,24 @@
         public int Lux { get; set; }
     }
 
+    private async Task Runner()
+    {
+        while (true)
+        {
+            var result = await client.GetFromJsonAsync<ColorSensorData>("Sync/ReadColorSensor") ?? new ColorSensorData();
+                    Color = Color.FromArgb(1,
+                        (byte)((0xFF) * (result.Red / (float)(0xFFFF))),
+                        (byte)((0xFF) * (result.Green / (float)(0xFFFF))),
+                        (byte)((0xFF) * (result.Blue / (float)(0xFFFF))));
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(500);
+        }
+        
+    }
+
     private async Task CheckColor()
     {
-        var result = await client.GetFromJsonAsync<ColorSensorData>("Sync/ReadColorSensor") ?? new ColorSensorData();
-        Color = Color.FromArgb(1,
-            (byte)((0xFF) * (result.Red / (float)(0xFFFF))),
-            (byte)((0xFF) * (result.Green / (float)(0xFFFF))),
-            (byte)((0xFF) * (result.Blue / (float)(0xFFFF))));
+        new Thread(async () => await Runner()).Start();
     }
 
     private async Task LogData()
