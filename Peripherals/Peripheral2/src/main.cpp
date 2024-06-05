@@ -68,21 +68,31 @@ void readDepthSensor(ModbusPacket packet)
   connector.sendData(packet.function, &reading, 1);
 }
 
-void setServoAngle(ModbusPacket packet)
+void setServoAngles(ModbusPacket packet)
 {
   if (packet.dataLength % 2 == 0)
   {
-    for (int i = 0; i < packet.dataLength / 2; i++)
-    {
-      servoController.setImmediateAngle(packet.data[2 * i], packet.data[2 * i + 1]);
-    }
+    servoController.setImmediateAngles(packet.data, packet.dataLength);
   }
+}
+
+void setServoProgressions(ModbusPacket packet)
+{
+  if (packet.dataLength % 2 == 0)
+  {
+    servoController.setServoProgressions(packet.data, packet.dataLength);
+  }
+}
+
+void setPiston(ModbusPacket packet) {
+
 }
 
 void moveBelt(ModbusPacket packet)
 {
-  uint16_t *distance = (uint16_t *)(&packet.data);
+  short *distance = (short *)(&packet.data);
   motorDriver.moveLength(*distance);
+  
 }
 
 void reportTimes(ModbusPacket packet)
@@ -102,18 +112,18 @@ void setup()
   servoController.init();
   depthSensor.init();
 
-  servoController.addServo(0, 180);
-  servoController.addServo(1, 0);
-  servoController.addServo(2, 0);
-  servoController.addServo(3, 0);
-  servoController.addServo(4, 0);
+  servoController.addServo(0, 100, 10);
+  servoController.addServo(1, 170, 10);
+  servoController.addServo(2, 170, 10);
+  servoController.addServo(3, 170, 10);
 
   connector.addProcessor(0, *writeToDisplay);
   connector.addProcessor(1, *readColorSensor);
   connector.addProcessor(2, *moveBelt);
-  connector.addProcessor(3, *setServoAngle);
+  connector.addProcessor(3, *setServoAngles);
   connector.addProcessor(4, *readDepthSensor);
   connector.addProcessor(5, *reportTimes);
+  connector.addProcessor(6, *setServoProgressions);
 
   xTaskCreatePinnedToCore(
       HandleConnector,

@@ -12,22 +12,17 @@
 class ServoController {
     private:
         Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
-        int motionDuration[16];
-        int currentPosition[16];
-        int startingPosition[16];
-        int desiredPosition[16];
-        int64_t motionStartMS[16];
-        int64_t lastTickUpdate = 0;
-        int DEFAULT_SWING_DURATION = 1500;
-        int convertAngleToPosition(int angle);
-        long long motionStartTime[16];
+        int convertAngleToPosition(byte angle);
+        byte minimumAngle[16];
+        byte maximumAngle[16];
+        bool inverse[16];
     public:
         void init();
-        void addServo(int servonum, int initialAngle);
-        void setAngle(int servonum, int angle, int durationMS);
-        void setAngle(int servonum, int angle);
-        void setImmediateAngle(int servonum, int angle);
-        void interpretMessage(char* message);
+        void addServo(byte servonum, byte minimumAngle, byte maximumAngle);
+        void setImmediateAngle(byte servonum, byte angle);
+        void setServoProgression(byte servonum, byte value);
+        void setImmediateAngles(byte* packet, int length);
+        void setServoProgressions(byte* message, int length);
         void tick();
 };
 
