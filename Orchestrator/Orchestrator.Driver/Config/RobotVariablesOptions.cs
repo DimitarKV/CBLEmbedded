@@ -16,4 +16,7 @@ public class RobotVariablesOptions
     public int BarrierColorSensorDistance { get; set; }
     public int InterOperationDelayMs { get; set; }
     public int BarrierAdjustmentDistance { get; set; }
+    public int ColorSensorPusherDistance { get; set; }
+    public int InterPusherDistance { get; set; }
+    public int PusherMoveDelayMs { get; set; }
 }

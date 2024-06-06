@@ -11,6 +11,7 @@ private:
     uint16_t _colorSuccess = 0x07e0;
     uint16_t _colorFailure = 0xf800;
     uint16_t _colorWarning = 0xfc67;
+    uint16_t _colorCoolBg = 0x8dff;
     bool logMode = false;
 public:
     Display(int cs, int dc, int rst) : _tft(cs, dc, rst) {
@@ -39,12 +40,28 @@ public:
         _tft.setTextSize(2);
         _tft.print(message);
     }
+
+    void writeWithWrapToCanvas(char* message, int x1, int y1, int x2, int y2) {
+    }
+
+    void writeCurrentOperation(char* message) {
+        uint16_t textBg = _colorCoolBg;
+        _tft.fillRect(0, 0, 240, 20, textBg);
+        _tft.setCursor(4, 22);
+        _tft.setTextColor(0);
+        _tft.setTextWrap(true);
+        _tft.setTextSize(2);
+        _tft.print(message);
+    }
+
     void interpretMessage(char* dataPacket) {
         char command[3];
         memcpy(command, dataPacket, 2);
         command[2] = '\0';
         if(command[0] == 's') {
             writeStatusMessage(&dataPacket[2], command[1] - '0');
+        } else if (strcmp(command, "op")) {
+            writeCurrentOperation(&dataPacket[2]);
         }
     }
 

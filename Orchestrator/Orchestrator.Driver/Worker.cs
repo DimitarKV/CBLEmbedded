@@ -32,6 +32,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         }
     }
 
+    private static int counter = 0;
     private async Task HandleObject()
     {
         await OpenBarrierAsync();
@@ -40,8 +41,16 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         await OpenBarrierAsync(false);
         await MoveBeltAsync(_options.BarrierColorSensorDistance - _options.BarrierPassingDistance);
         await WaitMotorStopAsync();
-        await Task.Delay(500);
+        
         string objectType = await ClassifyObjectWithColorSensorAsync();//get the color
+
+        await MoveBeltAsync(_options.ColorSensorPusherDistance);
+        await WaitMotorStopAsync();
+        await MoveBeltAsync(_options.InterPusherDistance * (counter % 3));
+        await WaitMotorStopAsync();
+        await PushAsync(counter % 3);
+        counter++;
+
         
         if (objectType == "white_disc")
         {
@@ -178,6 +187,32 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
                     }
                 });
         await Task.Delay(_options.InterOperationDelayMs);
+    }
+    
+    private async Task PushAsync(int pusherNumber)
+    {
+        await robotService
+            .SetServoProgressions(
+                new SetServoProgressionsMessage()
+                {
+                    Progressions = new List<ServoProgressionDto>()
+                    {
+                        new ServoProgressionDto()
+                            {ServoId = (byte)(pusherNumber + 1), Progression = 255}
+                    }
+                });
+        await Task.Delay(_options.PusherMoveDelayMs);
+        await robotService
+            .SetServoProgressions(
+                new SetServoProgressionsMessage()
+                {
+                    Progressions = new List<ServoProgressionDto>()
+                    {
+                        new ServoProgressionDto()
+                            {ServoId = (byte)(pusherNumber + 1), Progression = 0}
+                    }
+                });
+        await Task.Delay(_options.PusherMoveDelayMs);
     }
 
     int TranslationTimeMs(int distance)
