@@ -41,17 +41,40 @@ public:
         _tft.print(message);
     }
 
-    void writeWithWrapToCanvas(char* message, int x1, int y1, int x2, int y2) {
+    void writeWithWrapToCanvas(char* message, int textSize, int padding, int x1, int y1, int x2, int y2) {
+        _tft.setTextSize(textSize);
+        _tft.fillRect(x1, y1, x2, y2, _backgroundColor);
+
+        int textLength = strlen(message);
+        int cursorX = x1 + padding;
+        int cursorY = y1 + padding;
+        _tft.fillRect(x1, y1, x2, textSize * 8 + 2 * padding, _colorCoolBg);
+
+        for (int i = 0; i < textLength; i++)
+        {
+            if(cursorX <= x2 - textSize * 8 - padding) {
+                _tft.setCursor(cursorX, cursorY);
+                _tft.print(message[i]);
+                cursorX += textSize * 8;
+            } else {
+                if(cursorY + textSize * 8 + padding > y2)
+                    break;
+
+                cursorX = x1 + padding;
+                cursorY += textSize * 8;
+                _tft.fillRect(x1, cursorY, x2, textSize * 8, _colorCoolBg);
+                _tft.setCursor(cursorX, cursorY);
+                _tft.print(message[i]);
+            }
+        }
+        
     }
 
     void writeCurrentOperation(char* message) {
         uint16_t textBg = _colorCoolBg;
-        _tft.fillRect(0, 0, 240, 20, textBg);
-        _tft.setCursor(4, 22);
         _tft.setTextColor(0);
         _tft.setTextWrap(true);
-        _tft.setTextSize(2);
-        _tft.print(message);
+        writeWithWrapToCanvas(message, 2, 4, 0, 20, 240, 135);
     }
 
     void interpretMessage(char* dataPacket) {
@@ -60,7 +83,7 @@ public:
         command[2] = '\0';
         if(command[0] == 's') {
             writeStatusMessage(&dataPacket[2], command[1] - '0');
-        } else if (strcmp(command, "op")) {
+        } else if (command[0] == 'o' && command[1] == 'p') {
             writeCurrentOperation(&dataPacket[2]);
         }
     }
