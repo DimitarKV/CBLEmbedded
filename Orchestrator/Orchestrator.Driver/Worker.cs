@@ -45,9 +45,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         string objectType = await ClassifyObjectWithColorSensorAsync();//get the color
 
         await MoveBeltAsync(_options.ColorSensorPusherDistance);
-        await WaitMotorStopAsync();
         await MoveBeltAsync(_options.InterPusherDistance * (counter % 3));
-        await WaitMotorStopAsync();
         await PushAsync(counter % 3);
         counter++;
 
@@ -214,17 +212,11 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
                 });
         await Task.Delay(_options.PusherMoveDelayMs);
     }
-
-    int TranslationTimeMs(int distance)
-    {
-        return (int) ((distance / (float)_options.Motor.Speed) * 1000);
-    }
     
     private async Task MoveBeltAsync(int distance)
     {
         await robotService.MoveBelt(new MoveBeltMessage() { Distance = distance });
-        await Task.Delay(TranslationTimeMs(_options.BarrierPassingDistance)); 
-        await Task.Delay(_options.InterOperationDelayMs);
+        await WaitMotorStopAsync();
     }
 
     private async Task<bool> MotorStillMovingAsync()
@@ -236,7 +228,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
     {
         while ((await MotorStillMovingAsync()))
         {
-            
+            await Task.Delay(100);
         }
     }
 
