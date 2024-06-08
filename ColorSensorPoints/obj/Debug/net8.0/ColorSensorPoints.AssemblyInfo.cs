@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ColorSensorPoints")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4701599df43bedae330158db7bd6fa89342dcfbf")]
 [assembly: System.Reflection.AssemblyProductAttribute("ColorSensorPoints")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ColorSensorPoints")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
