@@ -13,5 +13,9 @@ public class SpawnDisks : MonoBehaviour
         {
             Instantiate(diskPrefabs[(Random.Range(0, diskPrefabs.Length))], transform.position, Quaternion.identity);
         }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
     }
 }

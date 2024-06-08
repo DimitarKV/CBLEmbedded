@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Container3.cs" />
     <Compile Include="Assets\Scripts\Servo2Push.cs" />
+    <Compile Include="Assets\Scripts\ResetScene.cs" />
     <Compile Include="Assets\Scripts\ObjectHandling.cs" />
     <Compile Include="Assets\Scripts\Empty.cs" />
     <Compile Include="Assets\Scripts\Ground.cs" />
