@@ -26,6 +26,9 @@ private:
     int serialBufferIndex = 0;
     int serialBytesToRead = 0;
     ModbusPacket packet;
+    byte responseData[MODBUS_PACKET_DATA_SIZE];
+    int responseDataLength = 0;
+    bool responseToSend = false;
 
     int extractNullTerminatedLength(char* buffer);
     // Buffer must be null-terminated
@@ -38,11 +41,13 @@ private:
     void handleSerial();
     void processModbusCommand(ModbusPacket packet);
     void printHex(byte value);
+    void sendModbusResponsePart();
 public:
+    byte deviceStatus = 0;    
     void init();
     void tick();
     void addProcessor(byte function, modbusFuncPtr processor);
-    void sendData(byte function, byte* buffer, int length);
+    void sendData(byte* buffer, int length);
 };
 
 #endif

@@ -4,34 +4,28 @@
 #include <Wire.h>
 #include <SPI.h>
 #include "Adafruit_TCS34725.h"
-
-enum ColorSensorStatus {
-    COLOR_SENSOR_OK,
-    COLOR_SENSOR_NOT_FOUND,
-    COLOR_SENSOR_READINGS_TOO_BRIGHT,
-    COLOR_SENSOR_READINGS_TOO_DARK
-};
+#include "../ErrorProneDevice.h"
 
 struct ColorSensorData {
     uint16_t r, g, b, c, colorTemp, lux;
 };
 
-class ColorSensor {
+class ColorSensor : public ErrorProneDevice {
 private:
-    int integrationTime = TCS34725_INTEGRATIONTIME_240MS;
-    Adafruit_TCS34725 tcs = Adafruit_TCS34725(integrationTime, TCS34725_GAIN_16X);
-    
+    int sdaPin, sclPin;
+    int integrationTime = TCS34725_INTEGRATIONTIME_180MS;
+    int integrationTimeMs = 180; // IMPORTANT: Update in numerical terms as above
+    Adafruit_TCS34725 tcs;
     ColorSensorData data;
-    ColorSensorStatus status = COLOR_SENSOR_OK;
     int64_t lastRead = 0;
 
+
 public: 
-    void init();
+    ColorSensor(int sda, int scl);
+    bool init();
     void tick();
-    void print();
-    void status_check();
-    void colorDetect(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
-    ColorSensorStatus getStatus();
+    void validity_check();
+    bool status_check();
     ColorSensorData getData();
 };
 

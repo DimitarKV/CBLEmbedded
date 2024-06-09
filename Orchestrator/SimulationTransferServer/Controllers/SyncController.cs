@@ -43,6 +43,13 @@ public class SyncController(IRobotService robotService) : ControllerBase
         await robotService.SetServoPos(new SetServoPositionsMessage() {ServoParameters = dto});
         return Ok();
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> SetServoProgressions([FromBody] List<ServoProgressionDto> dto)
+    {
+        await robotService.SetServoProgressions(new SetServoProgressionsMessage() {Progressions = dto});
+        return Ok();
+    }
 
     [HttpPost]
     public async Task<IActionResult> MoveBelt([FromBody] MoveBeltMessage message)
@@ -51,6 +58,32 @@ public class SyncController(IRobotService robotService) : ControllerBase
         return Ok();
     }
 
+    [HttpGet]
+    public async Task<IActionResult> ReadStatus()
+    {
+        return Ok(await robotService.ReadStatusAsync());
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> MoveBeltContinuous([FromBody] MoveBeltContinuousMessage message)
+    {
+        await robotService.MoveBelt(message);
+        return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MoveBeltSteps([FromBody] MoveBeltStepsMessage message)
+    {
+        await robotService.MoveBeltSteps(message);
+        return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> IsMotorRunning()
+    {
+        return Ok(await robotService.IsMotorMoving());
+    }
+    
     [HttpGet]
     public async Task<IActionResult> ReadDepthSensor()
     {

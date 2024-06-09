@@ -1,4 +1,5 @@
-﻿using Modbus.Types.Interfaces;
+﻿using Modbus.Types;
+using Modbus.Types.Interfaces;
 
 namespace Modbus.Connectors;
 
@@ -20,8 +21,10 @@ public interface IModbusConnector
     /// <param name="function">A unique operation code</param>
     /// <param name="data">To send in the packet</param>
     /// <returns>Whether the operation was successful</returns>
-    Task<bool> SendModbusMessageAsync(IModbusSerializable serializable);
-    Task<byte[]> ReadModbusMessageAsync();
+    Task<ModbusResponse> SendModbusMessageAsync(IModbusSerializable serializable);
+
+    Task<ModbusResponse<T>> ReadModbusMessageAsync<T>(T serializable)
+        where T : IModbusSerializable, IModbusDeserializable<T>, new();
     void PurgeBuffers();
     void Read();
     bool CanRead();

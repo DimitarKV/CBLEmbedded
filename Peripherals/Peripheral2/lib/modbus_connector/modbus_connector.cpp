@@ -2,7 +2,8 @@
 
 uint64_t packetReceive = 0;
 
-int ModbusConnector::extractNullTerminatedLength(char* buffer) {
+int ModbusConnector::extractNullTerminatedLength(char *buffer)
+{
     int index = 0;
     while (buffer[index] != '\0')
     {
@@ -11,7 +12,7 @@ int ModbusConnector::extractNullTerminatedLength(char* buffer) {
     return index;
 }
 
-byte ModbusConnector::calculateLRC(byte* buffer, int length)
+byte ModbusConnector::calculateLRC(byte *buffer, int length)
 {
     int calculatedLrc = 0;
     for (int i = 0; i < length; i++)
@@ -22,7 +23,7 @@ byte ModbusConnector::calculateLRC(byte* buffer, int length)
     return calculatedLrc;
 }
 
-byte ModbusConnector::calculateLRCFromHex(char* buffer, int length)
+byte ModbusConnector::calculateLRCFromHex(char *buffer, int length)
 {
     int calculatedLrc = 0;
     for (int i = 0; i < length; i += 2)
@@ -37,13 +38,13 @@ byte ModbusConnector::calculateLRCFromHex(char* buffer, int length)
     return calculatedLrc;
 }
 
-
 bool ModbusConnector::serialRead()
 {
     if (Serial.available())
     {
         serialBuffer[serialBufferIndex] = Serial.read();
-        if(serialBuffer[serialBufferIndex] == ':') {
+        if (serialBuffer[serialBufferIndex] == ':')
+        {
             // Serial1.print("Receive: ");
             packetReceive = esp_timer_get_time();
         }
@@ -58,7 +59,7 @@ bool ModbusConnector::serialRead()
     return false;
 }
 
-void ModbusConnector::decodeModbusMessage(char* buffer)
+void ModbusConnector::decodeModbusMessage(char *buffer)
 {
     this->packet.isValid = false;
     int length = extractNullTerminatedLength(buffer);
@@ -98,16 +99,20 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
     }
 }
 
-void ModbusConnector::processModbusCommand(ModbusPacket packet) {
-    if(packet.isValid) {
+void ModbusConnector::processModbusCommand(ModbusPacket packet)
+{
+    if (packet.isValid)
+    {
+        if (this->processors[packet.function] != nullptr)
+            this->processors[packet.function](packet);
+        sendModbusResponsePart();
         Serial.println("ACK");
         Serial1.println("Send: ACK");
-        if(this->processors[packet.function] != nullptr)
-            this->processors[packet.function](packet);
         Serial1.print("Time to process request: ");
         Serial1.println(esp_timer_get_time() - packetReceive);
-
-    } else {
+    }
+    else
+    {
         Serial.println("NACK");
         Serial1.println("Send: NACK");
     }
@@ -116,14 +121,16 @@ void ModbusConnector::processModbusCommand(ModbusPacket packet) {
 void ModbusConnector::handleSerial()
 {
     decodeModbusMessage(serialBuffer);
-    
-    if(packet.isValid) {
+
+    if (packet.isValid)
+    {
         processModbusCommand(packet);
     }
     serialBufferIndex = 0;
 }
 
-void ModbusConnector::init() {
+void ModbusConnector::init()
+{
     for (int i = 0; i < PROCESSORS_COUNT; i++)
     {
         processors[i] = nullptr;
@@ -138,18 +145,21 @@ void ModbusConnector::tick()
     }
 }
 
-void ModbusConnector::addProcessor(byte function, modbusFuncPtr processor) {
+void ModbusConnector::addProcessor(byte function, modbusFuncPtr processor)
+{
     processors[function] = processor;
 }
 
-void ModbusConnector::printHex(byte value) {
+void ModbusConnector::printHex(byte value)
+{
     if (value == 0)
     {
         Serial.print("00");
         // Serial1.print("00");
         return;
     }
-    if(value <= 0xF) {
+    if (value <= 0xF)
+    {
         Serial.print("0");
         // Serial1.print("0");
     }
@@ -157,18 +167,31 @@ void ModbusConnector::printHex(byte value) {
     // Serial1.print(value, HEX);
 }
 
-void ModbusConnector::sendData(byte function, byte* buffer, int length) {
-    byte funcDataChunk[length + 1];
-    memcpy(&funcDataChunk[1], buffer, length);
-    funcDataChunk[0] = function;
+void ModbusConnector::sendData(byte *buffer, int length)
+{
+    memcpy(&responseData, buffer, length);
+    responseDataLength = length;
+    responseToSend = true;
+}
 
+void ModbusConnector::sendModbusResponsePart() {
     Serial.print(":");
-    // Serial1.print("Send::");
-    for (int i = 0; i < length + 1; i++)
-    {
-        printHex(funcDataChunk[i]);
+
+    if(responseToSend) {
+        byte dataChunk[responseDataLength + 1];
+        memcpy(&dataChunk[1], responseData, responseDataLength);
+        dataChunk[0] = deviceStatus;
+
+        for (int i = 0; i < responseDataLength + 1; i++)
+        {
+            printHex(dataChunk[i]);
+        }
+        printHex(calculateLRC(dataChunk, responseDataLength + 1));
+        responseToSend = false;
+    } else {
+        printHex(deviceStatus);
+        printHex(calculateLRC(&deviceStatus, 1));
     }
-    printHex(calculateLRC(funcDataChunk, length + 1));
-    Serial.print("\r\n");
-    // Serial1.print("\r\n");
+
+    // Serial.print("\r\n");
 }
