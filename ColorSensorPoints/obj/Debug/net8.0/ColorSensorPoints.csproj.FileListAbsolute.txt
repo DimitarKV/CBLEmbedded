@@ -27,3 +27,18 @@ C:\Users\kings\Desktop\Embedded Systems\Group Assignment\CBLEmbedded\ColorSensor
 C:\Users\kings\Desktop\Embedded Systems\Group Assignment\CBLEmbedded\ColorSensorPoints\bin\Debug\net8.0\ColorSensorPoints.pdb
 C:\Users\kings\Desktop\Embedded Systems\Group Assignment\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.genruntimeconfig.cache
 C:\Users\kings\Desktop\Embedded Systems\Group Assignment\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ref\ColorSensorPoints.dll
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\bin\Debug\net8.0\ColorSensorPoints.exe
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\bin\Debug\net8.0\ColorSensorPoints.deps.json
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\bin\Debug\net8.0\ColorSensorPoints.runtimeconfig.json
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\bin\Debug\net8.0\ColorSensorPoints.dll
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\bin\Debug\net8.0\ColorSensorPoints.pdb
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.GeneratedMSBuildEditorConfig.editorconfig
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.AssemblyInfoInputs.cache
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.AssemblyInfo.cs
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.csproj.CoreCompileInputs.cache
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.sourcelink.json
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.dll
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\refint\ColorSensorPoints.dll
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.pdb
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ColorSensorPoints.genruntimeconfig.cache
+E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\obj\Debug\net8.0\ref\ColorSensorPoints.dll

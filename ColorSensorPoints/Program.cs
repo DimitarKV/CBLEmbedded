@@ -4,9 +4,10 @@ using System.ComponentModel.Design;
 using System.Drawing;
 using System.Linq;
 using System.Xml.Schema;
+
 /**
  * Class Point for the points
- * 
+ *
  */
 public class Point
 {
@@ -39,44 +40,42 @@ public class Point
         return Red + ", " + Green + ", " + Blue;
     }
 }
+
+public record Cylinder(Point A, Point B, int Radius, string ClassificationName);
+
 public class Program
 {
+    public static List<Cylinder> ColorSpaces { get; set; } = new ()
+    {
+        new Cylinder(new Point(1600, 2600, 2000),
+            new Point(2400, 3600, 2650),
+            250, "black_disc"),
+        new Cylinder(new Point(48000, 64800, 44000),
+            new Point(66000, 66500, 61000),
+            2500, "white_disc"),
+        new Cylinder(new Point(0, 0, 0),
+            new Point(3100, 3600, 3600),
+            400, "empty")
+    };
+    
+
     /**
      * Method that finds the angle <PAB where AB is the line and P is our point
      */
-    public static double AngleBetweenVectorAndPointAP(Point P, Point A, Point B)
+    public static double AngleBetweenPointAndVector(Point P, Point A, Point B)
     {
         double[] AP = { P.Red - A.Red, P.Green - A.Green, P.Blue - A.Blue };
         double[] AB = { B.Red - A.Red, B.Green - A.Green, B.Blue - A.Blue };
 
-        double dotProductAP = DotProduct(AP, AB);
+        double dotProduct = DotProduct(AP, AB);
         double magAP = Magnitude(AP);
         double magAB = Magnitude(AB);
 
-        double cosThetaAP = dotProductAP / (magAP * magAB);
+        double cosThetaAP = dotProduct / (magAP * magAB);
         double angleRadAP = Math.Acos(Math.Clamp(cosThetaAP, -1.0, 1.0));
         double angleDegAP = RadiansToDegrees(angleRadAP);
 
         return angleDegAP;
-    }
-
-    /**
-     * Method that finds the angle <PBA where AB is the line and P is our point
-     */
-    public static double AngleBetweenVectorAndPointBP(Point P, Point A, Point B)
-    {
-        double[] AB = { B.Red - A.Red, B.Green - A.Green, B.Blue - A.Blue };
-        double[] BP = { B.Red - P.Red, B.Green - P.Green, B.Blue - P.Blue };
-
-        double dotProductBP = DotProduct(BP, AB);
-        double magAB = Magnitude(AB);
-        double magBP = Magnitude(BP);
-
-        double cosThetaBP = dotProductBP / (magBP * magAB);
-        double angleRadBP = Math.Acos(Math.Clamp(cosThetaBP, -1.0, 1.0));
-        double angleDegBP = RadiansToDegrees(angleRadBP);
-
-        return angleDegBP;
     }
 
     public static double DotProduct(double[] vec1, double[] vec2)
@@ -96,13 +95,12 @@ public class Program
 
     /**
      * Finds the perpendicular, the distance from our point to the line.
-     * 
+     *
      * @param P - our point
      * @param A - first point of the line
      * @param B - second point of the line
-     * 
+     *
      */
-
     public static double PointToLineDistance(Point P, Point A, Point B)
     {
         Point AP = P - A;
@@ -126,78 +124,34 @@ public class Program
 
     /**
      * Main method for derermining the color
-     * 
+     *
      * da, znam che ne e robust xd
-     * 
+     *
      */
     public static string ColorFind(Point P)
     {
-        Point Ablack = new Point(1600, 2600, 2000);
-        Point Bblack = new Point(2400, 3600, 2650);
-        int rBlack = 250;
-
-        Point Awhite = new Point(48000, 64800, 44000);
-        Point Bwhite = new Point(66000, 66500, 61000);
-        int rWhite = 2500;
-
-        Point Aconveyor = new Point(0, 0, 0);
-        Point Bconveyor = new Point(3100, 3600, 3600);
-        int rConveyor = 400;
-
-        string color = "";
-
-        double distBlack = PointToLineDistance(P, Ablack, Bblack);
-        double distWhite = PointToLineDistance(P, Awhite, Bwhite);
-        double distConveyor = PointToLineDistance(P, Aconveyor, Bconveyor);
-
-        if ((distBlack < distWhite) && (distBlack < distConveyor) && (distBlack <= rBlack))
+        double closestDistance = Double.MaxValue;
+        Cylinder currentChoice = null;
+        
+        foreach (var colorSpace in ColorSpaces)
         {
-            double angleDegAPblack = AngleBetweenVectorAndPointAP(P, Ablack, Bblack);
-            double angleDegBPblack = AngleBetweenVectorAndPointBP(P, Ablack, Bblack);
-
-            if (angleDegAPblack <= 90 && angleDegBPblack <= 90)
+            double angleDegAP = AngleBetweenPointAndVector(P, colorSpace.A, colorSpace.B);
+            double angleDegBP = AngleBetweenPointAndVector(P, colorSpace.B, colorSpace.A);
+            if (angleDegAP <= 90 && angleDegBP <= 90)
             {
-                color = "black";
-            }
-
-            else
-            {
-                color = "other";
+                double distanceToSpace = PointToLineDistance(P, colorSpace.A, colorSpace.B);
+                if (distanceToSpace < closestDistance)
+                {
+                    currentChoice = colorSpace;
+                    closestDistance = distanceToSpace;
+                }   
             }
         }
 
-        else if ((distWhite < distBlack) && (distWhite < distConveyor) && (distWhite <= rWhite))
-        {
-            double angleDegAPwhite = AngleBetweenVectorAndPointAP(P, Awhite, Bwhite);
-            double angleDegBPwhite = AngleBetweenVectorAndPointBP(P, Awhite, Bwhite);
+        if (currentChoice is not null)
+            return currentChoice.ClassificationName;
 
-            if (angleDegAPwhite <= 90 && angleDegBPwhite <= 90)
-            {
-                color = "white";
-            }
-
-            else
-            {
-                color = "other";
-            }
-        }
-
-        else if ((distConveyor < distBlack) && (distConveyor < distWhite) && (distConveyor <= rConveyor))
-        {
-            double angleDegAPconveyor = AngleBetweenVectorAndPointAP(P, Aconveyor, Bconveyor);
-            double angleDegBPconveyor = AngleBetweenVectorAndPointBP(P, Aconveyor, Bconveyor);
-
-            if (angleDegAPconveyor <= 90 && angleDegBPconveyor <= 90)
-            {
-                color = "conveyor";
-            }
-
-            else
-            {
-                color = "other";
-            }
-        }              
-        return color;
+        return "none";
     }
 
     /**
@@ -218,6 +172,5 @@ public class Program
 
         string diskColor = ColorFind(P);
         Console.WriteLine(diskColor);
-
     }
 }

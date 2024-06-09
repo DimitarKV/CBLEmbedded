@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ColorSensorPoints
-build_property.ProjectDir = C:\Users\kings\Desktop\Embedded Systems\Group Assignment\CBLEmbedded\ColorSensorPoints\
+build_property.ProjectDir = E:\TUe\Y1\Q4\CBLEmbedded\ColorSensorPoints\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

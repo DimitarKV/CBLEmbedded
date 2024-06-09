@@ -1,31 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\kings\\Desktop\\Embedded Systems\\Group Assignment\\ColorSensorPoints\\ColorSensorPoints.csproj": {}
+    "E:\\TUe\\Y1\\Q4\\CBLEmbedded\\ColorSensorPoints\\ColorSensorPoints.csproj": {}
   },
   "projects": {
-    "C:\\Users\\kings\\Desktop\\Embedded Systems\\Group Assignment\\ColorSensorPoints\\ColorSensorPoints.csproj": {
+    "E:\\TUe\\Y1\\Q4\\CBLEmbedded\\ColorSensorPoints\\ColorSensorPoints.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\kings\\Desktop\\Embedded Systems\\Group Assignment\\ColorSensorPoints\\ColorSensorPoints.csproj",
+        "projectUniqueName": "E:\\TUe\\Y1\\Q4\\CBLEmbedded\\ColorSensorPoints\\ColorSensorPoints.csproj",
         "projectName": "ColorSensorPoints",
-        "projectPath": "C:\\Users\\kings\\Desktop\\Embedded Systems\\Group Assignment\\ColorSensorPoints\\ColorSensorPoints.csproj",
-        "packagesPath": "C:\\Users\\kings\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\kings\\Desktop\\Embedded Systems\\Group Assignment\\ColorSensorPoints\\obj\\",
+        "projectPath": "E:\\TUe\\Y1\\Q4\\CBLEmbedded\\ColorSensorPoints\\ColorSensorPoints.csproj",
+        "packagesPath": "C:\\Users\\mitko\\.nuget\\packages\\",
+        "outputPath": "E:\\TUe\\Y1\\Q4\\CBLEmbedded\\ColorSensorPoints\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\kings\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\mitko\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
