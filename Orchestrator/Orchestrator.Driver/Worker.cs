@@ -1,5 +1,6 @@
 using Orchestrator.Driver.Config;
 using Orchestrator.Driver.Config.ColorSensor;
+using ServiceLayer.Helpers;
 using ServiceLayer.Services;
 using ServiceLayer.Types;
 
@@ -9,6 +10,8 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
 {
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
+
+    private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -45,7 +48,9 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         await MoveBeltAsync(_options.BarrierColorSensorDistance - _options.BarrierPassingDistance);
         await WaitMotorStopAsync();
 
-        string objectType = await ClassifyObjectWithColorSensorAsync(); //get the color
+        await Task.Delay(200);
+        string objectName = await ClassifyObjectWithColorSensorAsync(); //get the color
+        await robotService.WriteToDisplay(new WriteToDisplayMessage("op" + objectName));
 
         await MoveBeltAsync(_options.ColorSensorPusherDistance);
         await MoveBeltAsync(_options.InterPusherDistance * (counter % 3));
@@ -53,8 +58,8 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         counter++;
 
 
-        if (objectType == "white_disc")
-        {
+        // if (objectType == "white_disc")
+        // {
             // int minimalWeight = getMinimalWeight(weight1, weight2, weight3, 10);
             // switch (minimalWeight)
             // {
@@ -89,7 +94,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
             //         }
             //         break;
             // }
-        }
+        // }
         // else if (colorCurrObj == "Black")
         // {
         //     int minimalWeight = getMinimalWeight(weight1, weight2, weight3, 10);
@@ -255,12 +260,8 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
     private async Task<string> ClassifyObjectWithColorSensorAsync()
     {
         ReadColorSensorMessage colorSensorMessage = (await robotService.ReadColorSensorData()).Data!;
-        foreach (var identifiableObject in _options.ColorSensor.Objects)
-        {
-            if (InDeviation(colorSensorMessage, identifiableObject))
-                return identifiableObject.Name;
-        }
-
-        return "none";
+        var objectName = _colorSensorInterpreter.ColorFind(new Point(colorSensorMessage.Red, colorSensorMessage.Green,
+            colorSensorMessage.Blue));
+        return objectName;
     }
 }
