@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <motor_driver.h>
+#include <../ErrorProneDevice.h>
 
 MotorDriver::MotorDriver(int in1, int in2, int in3, int in4)
 {
@@ -9,11 +10,17 @@ MotorDriver::MotorDriver(int in1, int in2, int in3, int in4)
     _in4 = in4;
 }
 
-void MotorDriver::init() {
+bool MotorDriver::init()
+{
     pinMode(_in1, OUTPUT);
     pinMode(_in2, OUTPUT);
     pinMode(_in3, OUTPUT);
     pinMode(_in4, OUTPUT);
+    return true;
+}
+
+bool MotorDriver::status_check() {
+    return true;
 }
 
 void MotorDriver::moveSteps(int steps)
@@ -21,38 +28,59 @@ void MotorDriver::moveSteps(int steps)
     remainingSteps += steps;
 }
 
-void MotorDriver::moveLength(int mm) {
+void MotorDriver::moveLength(int mm)
+{
     remainingSteps += mm * calibSteps / (float)calibLengthMM;
 }
 
-void MotorDriver::moveContinuous(bool running) {
+void MotorDriver::moveContinuous(bool running)
+{
+    stepMotor(4);
     autoRun = running;
+    if (!running)
+    {
+        remainingSteps = 0;
+    }
 }
 
-bool MotorDriver::isMoving() {
+bool MotorDriver::isMoving()
+{
     return remainingSteps != 0;
+}
+
+void MotorDriver::lock(bool lock)
+{
+    ErrorProneDevice::lock(lock);
+    if(lock) {
+        moveContinuous(false);
+    }
 }
 
 void MotorDriver::tick()
 {
-    uint64_t now = esp_timer_get_time();
-    if (now - lastStep >= stepDelay)
+    if (!_locked)
     {
-        lastStep = now;
-        if (remainingSteps < 0)
+        uint64_t now = esp_timer_get_time();
+        if (now - lastStep >= stepDelay)
         {
-            stepMotor(abs(remainingSteps) % 4);
-            remainingSteps++;
-        }
-        else if (remainingSteps > 0)
-        {
-            stepMotor(3 - abs(remainingSteps) % 4);
-            remainingSteps--;
-        } else {
-            if(autoRun)
-                remainingSteps = 4;
+            lastStep = now;
+            if (remainingSteps < 0)
+            {
+                stepMotor(abs(remainingSteps) % 4);
+                remainingSteps++;
+            }
+            else if (remainingSteps > 0)
+            {
+                stepMotor(3 - abs(remainingSteps) % 4);
+                remainingSteps--;
+            }
             else
-                stepMotor(4);
+            {
+                if (autoRun)
+                    remainingSteps = 4;
+                else
+                    stepMotor(4);
+            }
         }
     }
 }

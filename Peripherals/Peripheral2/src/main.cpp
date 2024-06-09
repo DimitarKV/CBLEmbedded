@@ -1,4 +1,7 @@
+#define LOG_LOCAL_LEVEL ESP_LOG_NONE
 #include <Arduino.h>
+
+#include <Wire.h>
 
 #include <../lib/modbus_connector/modbus_connector.h>
 #include <../lib/color_sensor/color_sensor.h>
@@ -10,6 +13,7 @@
 #include <Adafruit_ST7789.h>
 #include <Adafruit_GFX.h>
 
+
 #define STEPPER_IN1 5
 #define STEPPER_IN2 6
 #define STEPPER_IN3 7
@@ -17,10 +21,11 @@
 
 ModbusConnector connector;
 Display display = Display(10, 2, 4);
-ColorSensor colorSensor;
+ColorSensor colorSensor = ColorSensor(21, 1);
 ServoController servoController = ServoController();
 MotorDriver motorDriver(STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
 DepthSensor depthSensor;
+bool devicesLocked = false;
 
 TaskHandle_t HandleConnectorTaskHandle;
 void HandleConnector(void *parameter)
@@ -40,13 +45,13 @@ void writeToDisplay(ModbusPacket inputPacket)
 void readColorSensor(ModbusPacket packet)
 {
   ColorSensorData data = colorSensor.getData();
-  connector.sendData(packet.function, (byte *)(&data), 12);
+  connector.sendData((byte *)(&data), 12);
 }
 
 void readDepthSensor(ModbusPacket packet)
 {
   byte reading = depthSensor.getLastReading();
-  connector.sendData(packet.function, &reading, 1);
+  connector.sendData(&reading, 1);
 }
 
 void setServoAngles(ModbusPacket packet)
@@ -89,11 +94,30 @@ void moveBeltContinuous(ModbusPacket packet)
 
 void isMotorMoving(ModbusPacket packet) {
   bool isMoving = motorDriver.isMoving();
-  connector.sendData(packet.function, (byte*)&isMoving, 1);
+  connector.sendData((byte*)&isMoving, 1);
+}
+
+void checkStatus(ModbusPacket packet) {
+  connector.sendData((byte*)&devicesLocked, 1);
+}
+
+void lockDevices() {
+  colorSensor.lock();
+  depthSensor.lock();
+  motorDriver.lock();
+  devicesLocked = true;
+}
+
+void unlockDevices() {
+  colorSensor.lock(false);
+  depthSensor.lock(false);
+  motorDriver.lock(false);
+  devicesLocked = false;
 }
 
 void setup()
 {
+  Wire1.setPins(21, 1);
   Serial.begin(1000000);
   Serial1.begin(115200);
   Serial1.println("Here");
@@ -114,6 +138,7 @@ void setup()
   connector.addProcessor(2, *moveBelt);
   connector.addProcessor(3, *setServoAngles);
   connector.addProcessor(4, *readDepthSensor);
+  connector.addProcessor(5, *checkStatus);
   connector.addProcessor(6, *setServoProgressions);
   connector.addProcessor(7, *moveBeltContinuous);
   connector.addProcessor(8, *moveBeltSteps);
@@ -131,6 +156,16 @@ void setup()
 
 void loop()
 {
+  connector.deviceStatus = 
+  (!colorSensor.status_check() * 1) +
+  (!depthSensor.status_check() * 0b10);
+
+  if (connector.deviceStatus != 0) {
+    lockDevices();
+  } else {
+    unlockDevices();
+  }
+  
   colorSensor.tick();
   depthSensor.tick();
 }

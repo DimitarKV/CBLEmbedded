@@ -57,6 +57,12 @@ public class SyncController(IRobotService robotService) : ControllerBase
         await robotService.MoveBelt(message);
         return Ok();
     }
+
+    [HttpGet]
+    public async Task<IActionResult> ReadStatus()
+    {
+        return Ok(await robotService.ReadStatusAsync());
+    }
     
     [HttpPost]
     public async Task<IActionResult> MoveBeltContinuous([FromBody] MoveBeltContinuousMessage message)

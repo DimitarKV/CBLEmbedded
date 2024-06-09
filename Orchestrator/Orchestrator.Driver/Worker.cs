@@ -7,11 +7,11 @@ namespace Orchestrator.Driver;
 
 public class Worker(IRobotService robotService, IConfiguration configuration) : BackgroundService
 {
-    private readonly RobotVariablesOptions _options = configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
+    private readonly RobotVariablesOptions _options =
+        configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        
         while (!stoppingToken.IsCancellationRequested)
         {
             await OpenBarrierAsync(false);
@@ -20,8 +20,10 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
             {
                 await Task.Delay(100, stoppingToken);
             }
+
             await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
-            await robotService.MoveBelt(new MoveBeltMessage() {Distance = _options.BarrierAdjustmentDistance}); //by 20mm
+            await robotService.MoveBelt(new MoveBeltMessage()
+                { Distance = _options.BarrierAdjustmentDistance }); //by 20mm
             await WaitMotorStopAsync();
             await HandleObject();
             // break;
@@ -33,6 +35,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
     }
 
     private static int counter = 0;
+
     private async Task HandleObject()
     {
         await OpenBarrierAsync();
@@ -41,15 +44,15 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         await OpenBarrierAsync(false);
         await MoveBeltAsync(_options.BarrierColorSensorDistance - _options.BarrierPassingDistance);
         await WaitMotorStopAsync();
-        
-        string objectType = await ClassifyObjectWithColorSensorAsync();//get the color
+
+        string objectType = await ClassifyObjectWithColorSensorAsync(); //get the color
 
         await MoveBeltAsync(_options.ColorSensorPusherDistance);
         await MoveBeltAsync(_options.InterPusherDistance * (counter % 3));
         await PushAsync(counter % 3);
         counter++;
 
-        
+
         if (objectType == "white_disc")
         {
             // int minimalWeight = getMinimalWeight(weight1, weight2, weight3, 10);
@@ -86,7 +89,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
             //         }
             //         break;
             // }
-        } 
+        }
         // else if (colorCurrObj == "Black")
         // {
         //     int minimalWeight = getMinimalWeight(weight1, weight2, weight3, 10);
@@ -161,14 +164,21 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
     //     }
     //     return 3;
     // }
-    
+
     private async Task<bool> ObjectAtBarrierAsync()
     {
-        int depthSensorRange = (await robotService.ReadDepthSensorMessage()).Range;
-        if (depthSensorRange <= _options.DepthSensor.ObjectUpperBound)
+        var depthSensorResponse = await robotService.ReadDepthSensorMessage();
+        if (depthSensorResponse.Success && depthSensorResponse.Data is not null)
         {
-            return true;
+            int depthSensorRange = depthSensorResponse.Data.Range;
+            if (depthSensorRange <= _options.DepthSensor.ObjectUpperBound)
+            {
+                return true;
+            }
+
+            return false;
         }
+
         return false;
     }
 
@@ -181,12 +191,12 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
                     Progressions = new List<ServoProgressionDto>()
                     {
                         new ServoProgressionDto()
-                            {ServoId = 0, Progression = open ? (byte)0 : (byte)255}
+                            { ServoId = 0, Progression = open ? (byte)0 : (byte)255 }
                     }
                 });
         await Task.Delay(_options.InterOperationDelayMs);
     }
-    
+
     private async Task PushAsync(int pusherNumber)
     {
         await robotService
@@ -196,7 +206,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
                     Progressions = new List<ServoProgressionDto>()
                     {
                         new ServoProgressionDto()
-                            {ServoId = (byte)(pusherNumber + 1), Progression = 255}
+                            { ServoId = (byte)(pusherNumber + 1), Progression = 255 }
                     }
                 });
         await Task.Delay(_options.PusherMoveDelayMs);
@@ -207,12 +217,12 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
                     Progressions = new List<ServoProgressionDto>()
                     {
                         new ServoProgressionDto()
-                            {ServoId = (byte)(pusherNumber + 1), Progression = 0}
+                            { ServoId = (byte)(pusherNumber + 1), Progression = 0 }
                     }
                 });
         await Task.Delay(_options.PusherMoveDelayMs);
     }
-    
+
     private async Task MoveBeltAsync(int distance)
     {
         await robotService.MoveBelt(new MoveBeltMessage() { Distance = distance });
@@ -221,7 +231,10 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
 
     private async Task<bool> MotorStillMovingAsync()
     {
-        return (await robotService.IsMotorMoving()).isMoving;
+        var motorStillMovingResponse = await robotService.IsMotorMoving();
+        if (motorStillMovingResponse.Success && motorStillMovingResponse.Data is not null)
+            return motorStillMovingResponse.Data.isMoving;
+        return true;
     }
 
     private async Task WaitMotorStopAsync()
@@ -232,19 +245,19 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         }
     }
 
-    private bool inDeviation(ReadColorSensorMessage message, IdentifiableObject identifiableObject)
+    private bool InDeviation(ReadColorSensorMessage message, IdentifiableObject identifiableObject)
     {
         return Math.Abs(message.Red - identifiableObject.Red) <= identifiableObject.Deviation &&
                Math.Abs(message.Green - identifiableObject.Green) <= identifiableObject.Deviation &&
                Math.Abs(message.Blue - identifiableObject.Blue) <= identifiableObject.Deviation;
     }
-    
+
     private async Task<string> ClassifyObjectWithColorSensorAsync()
     {
-        ReadColorSensorMessage colorSensorMessage = await robotService.ReadColorSensorData();
+        ReadColorSensorMessage colorSensorMessage = (await robotService.ReadColorSensorData()).Data!;
         foreach (var identifiableObject in _options.ColorSensor.Objects)
         {
-            if (inDeviation(colorSensorMessage, identifiableObject))
+            if (InDeviation(colorSensorMessage, identifiableObject))
                 return identifiableObject.Name;
         }
 

@@ -105,6 +105,7 @@ void ModbusConnector::processModbusCommand(ModbusPacket packet)
     {
         if (this->processors[packet.function] != nullptr)
             this->processors[packet.function](packet);
+        sendModbusResponsePart();
         Serial.println("ACK");
         Serial1.println("Send: ACK");
         Serial1.print("Time to process request: ");
@@ -166,19 +167,31 @@ void ModbusConnector::printHex(byte value)
     // Serial1.print(value, HEX);
 }
 
-void ModbusConnector::sendData(byte function, byte *buffer, int length)
+void ModbusConnector::sendData(byte *buffer, int length)
 {
-    byte funcDataChunk[length + 1];
-    memcpy(&funcDataChunk[1], buffer, length);
-    funcDataChunk[0] = function;
+    memcpy(&responseData, buffer, length);
+    responseDataLength = length;
+    responseToSend = true;
+}
 
+void ModbusConnector::sendModbusResponsePart() {
     Serial.print(":");
-    // Serial1.print("Send::");
-    for (int i = 0; i < length + 1; i++)
-    {
-        printHex(funcDataChunk[i]);
+
+    if(responseToSend) {
+        byte dataChunk[responseDataLength + 1];
+        memcpy(&dataChunk[1], responseData, responseDataLength);
+        dataChunk[0] = deviceStatus;
+
+        for (int i = 0; i < responseDataLength + 1; i++)
+        {
+            printHex(dataChunk[i]);
+        }
+        printHex(calculateLRC(dataChunk, responseDataLength + 1));
+        responseToSend = false;
+    } else {
+        printHex(deviceStatus);
+        printHex(calculateLRC(&deviceStatus, 1));
     }
-    printHex(calculateLRC(funcDataChunk, length + 1));
+
     // Serial.print("\r\n");
-    // Serial1.print("\r\n");
 }

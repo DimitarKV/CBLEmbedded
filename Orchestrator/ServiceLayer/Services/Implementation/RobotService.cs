@@ -1,4 +1,5 @@
 ﻿using Modbus.Connectors;
+using Modbus.Types;
 using ServiceLayer.Types;
 
 namespace ServiceLayer.Services.Implementation;
@@ -19,58 +20,62 @@ public class RobotService : IRobotService
         modbusConnector = _modbusConnector;
     }
 
-    public async Task<bool> WriteToDisplay(WriteToDisplayMessage message)
+    public async Task<ModbusResponse> WriteToDisplay(WriteToDisplayMessage message)
     {
         _modbusConnector.PurgeBuffers();
-        await _modbusConnector
-            .SendModbusMessageAsync(message);
-        return true;
+        return await _modbusConnector
+            .SendModbusMessageAsync(message);;
     }
 
-    public async Task<ReadColorSensorMessage> ReadColorSensorData()
+    public async Task<ModbusResponse<ReadColorSensorMessage>> ReadColorSensorData()
     {
         _modbusConnector.PurgeBuffers();
-        return new ReadColorSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync(new ReadColorSensorMessage()));
+        return await _modbusConnector.ReadModbusMessageAsync(new ReadColorSensorMessage());
     }
 
-    public async Task SetServoPos(SetServoPositionsMessage message)
+    public async Task<ModbusResponse> SetServoPos(SetServoPositionsMessage message)
     {
-        await _modbusConnector.SendModbusMessageAsync(message);
+        return await _modbusConnector.SendModbusMessageAsync(message);
     }
 
-    public async Task SetServoProgressions(SetServoProgressionsMessage message)
+    public async Task<ModbusResponse> SetServoProgressions(SetServoProgressionsMessage message)
     {
-        await _modbusConnector.SendModbusMessageAsync(message);
+        return await _modbusConnector.SendModbusMessageAsync(message);
     }
 
-    public async Task MoveBelt(MoveBeltMessage message)
+    public async Task<ModbusResponse> MoveBelt(MoveBeltMessage message)
     {
-        await _modbusConnector.SendModbusMessageAsync(message);
+        return await _modbusConnector.SendModbusMessageAsync(message);
     }
 
-    public async Task MoveBeltSteps(MoveBeltStepsMessage message)
+    public async Task<ModbusResponse> MoveBeltSteps(MoveBeltStepsMessage message)
     {
-        await _modbusConnector.SendModbusMessageAsync(message);
+        return await _modbusConnector.SendModbusMessageAsync(message);
     }
 
-    public async Task MoveBelt(MoveBeltContinuousMessage message)
+    public async Task<ModbusResponse> MoveBelt(MoveBeltContinuousMessage message)
     {
-        await _modbusConnector.SendModbusMessageAsync(message);
+        return await _modbusConnector.SendModbusMessageAsync(message);
     }
 
-    public async Task<ReadMotorStateMessage> IsMotorMoving()
+    public async Task<ModbusResponse<ReadMotorStateMessage>> IsMotorMoving()
     {
-        return new ReadMotorStateMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync(new ReadMotorStateMessage()));
+        return await _modbusConnector.ReadModbusMessageAsync(new ReadMotorStateMessage());
     }
 
-    public async Task<ReadDepthSensorMessage> ReadDepthSensorMessage()
+    public async Task<ModbusResponse<ReadDepthSensorMessage>> ReadDepthSensorMessage()
     {
         _modbusConnector.PurgeBuffers();
-        return new ReadDepthSensorMessage().fromByteArray(await _modbusConnector.ReadModbusMessageAsync(new ReadDepthSensorMessage()));
+        return await _modbusConnector.ReadModbusMessageAsync(new ReadDepthSensorMessage());
     }
 
-    public async Task ToggleReportTimes()
+    public async Task<ModbusResponse> ToggleReportTimes()
     {
-        await _modbusConnector.SendModbusMessageAsync(new ToggleReportTimesMessage());
+        return await _modbusConnector.SendModbusMessageAsync(new ToggleReportTimesMessage());
+    }
+
+    public async Task<ModbusResponse<ReadStatusMessage>> ReadStatusAsync()
+    {
+        return await _modbusConnector.ReadModbusMessageAsync(new ReadStatusMessage());
     }
 }

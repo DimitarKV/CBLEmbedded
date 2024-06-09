@@ -6,15 +6,17 @@ int ServoController::convertAngleToPosition(byte angle)
     return (angle * (SERVOMAX - SERVOMIN) / 180.0f) + SERVOMIN;
 }
 
-void ServoController::init()
+bool ServoController::init()
 {
     pwm.begin();
     pwm.setOscillatorFrequency(27000000);
     pwm.setPWMFreq(SERVO_FREQ); // set the PWM frequency for the PCA9685
+    return true;
 }
 
 void ServoController::addServo(byte servonum, byte minAngle, byte maxAngle)
 {
+    active[servonum] = true;
     pwm.setPWM(servonum, 0, convertAngleToPosition(minAngle));
     if (minAngle > maxAngle)
     {
@@ -65,6 +67,26 @@ void ServoController::setServoProgressions(byte *message, int length)
     {
         setServoProgression(message[2 * i], message[2 * i + 1]);
     }
+}
+
+void ServoController::lock(bool lock)
+{
+    ErrorProneDevice::lock(lock);
+    if (lock)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            if (active[i])
+            {
+                setServoProgression(i, 0);
+            }
+        }
+    }
+}
+
+bool ServoController::status_check()
+{
+    return true;
 }
 
 void ServoController::tick()
