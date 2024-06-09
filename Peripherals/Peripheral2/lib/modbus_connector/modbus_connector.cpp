@@ -1,5 +1,7 @@
 #include "modbus_connector.h"
 
+uint64_t packetReceive = 0;
+
 int ModbusConnector::extractNullTerminatedLength(char* buffer) {
     int index = 0;
     while (buffer[index] != '\0')
@@ -41,6 +43,11 @@ bool ModbusConnector::serialRead()
     if (Serial.available())
     {
         serialBuffer[serialBufferIndex] = Serial.read();
+        if(serialBuffer[serialBufferIndex] == ':') {
+            // Serial1.print("Receive: ");
+            packetReceive = esp_timer_get_time();
+        }
+        // Serial1.print(serialBuffer[serialBufferIndex]);
         serialBufferIndex++;
         if (serialBufferIndex > 1 && serialBuffer[serialBufferIndex - 2] == '\r' && serialBuffer[serialBufferIndex - 1] == '\n')
         {
@@ -94,11 +101,15 @@ void ModbusConnector::decodeModbusMessage(char* buffer)
 void ModbusConnector::processModbusCommand(ModbusPacket packet) {
     if(packet.isValid) {
         Serial.println("ACK");
+        Serial1.println("Send: ACK");
         if(this->processors[packet.function] != nullptr)
             this->processors[packet.function](packet);
-        
+        Serial1.print("Time to process request: ");
+        Serial1.println(esp_timer_get_time() - packetReceive);
+
     } else {
         Serial.println("NACK");
+        Serial1.println("Send: NACK");
     }
 }
 
@@ -135,12 +146,15 @@ void ModbusConnector::printHex(byte value) {
     if (value == 0)
     {
         Serial.print("00");
+        // Serial1.print("00");
         return;
     }
     if(value <= 0xF) {
         Serial.print("0");
+        // Serial1.print("0");
     }
     Serial.print(value, HEX);
+    // Serial1.print(value, HEX);
 }
 
 void ModbusConnector::sendData(byte function, byte* buffer, int length) {
@@ -149,10 +163,12 @@ void ModbusConnector::sendData(byte function, byte* buffer, int length) {
     funcDataChunk[0] = function;
 
     Serial.print(":");
+    // Serial1.print("Send::");
     for (int i = 0; i < length + 1; i++)
     {
         printHex(funcDataChunk[i]);
     }
     printHex(calculateLRC(funcDataChunk, length + 1));
     Serial.print("\r\n");
+    // Serial1.print("\r\n");
 }

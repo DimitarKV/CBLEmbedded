@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Modbus.Configuration;
@@ -44,9 +45,10 @@ public class ModbusConnector : PortConnector, IModbusConnector
         return buffer;
     }
 
-    public void PurgeBuffer()
+    public void PurgeBuffers()
     {
         DiscardInBuffer();
+        DiscardOutBuffer();
     }
 
     public void Read()
@@ -88,18 +90,29 @@ public class ModbusConnector : PortConnector, IModbusConnector
         for (var i = 0; i < _retries + 1; i++)
         {
             string ack = "";
+            PurgeBuffers();
+            var watch = Stopwatch.StartNew();
             Write(data);
+            // await Task.Delay(100);
             try
             {
                 ack = await ReadCrLfLineFromStreamAsync();
+                
+                // ack = ReadLine();
             }
             catch (TimeoutException e)
             {
-                _logger.LogInformation("ACK packet receive timed out, retrying!");
+                _logger.LogError("ACK packet receive timed out, retrying!");
                 continue;
             }
+            finally
+            {
+                watch.Stop();
+                _logger.LogInformation("Operation took: {0}ms", watch.Elapsed.Milliseconds);
+            }
+            _logger.LogInformation("Received: {0}", ack);
             if (ack == "ACK") return true;
-            _logger.LogInformation("ACK packet receive unsuccessful, retrying!");
+            _logger.LogError("ACK packet receive unsuccessful, retrying!");
         }
         return false;
     }
@@ -121,11 +134,20 @@ public class ModbusConnector : PortConnector, IModbusConnector
     private async Task<string> ReadCrLfLineFromStreamAsync()
     {
         var data = "";
-
+        // byte[] data = new byte[1024];
+        // int index = 0;
+        
         while (true)
         {
             data += (char)(await ReadByteWithTimeoutAsync());
-            if (data.Length > 1 && data[^2] == '\r' && data[^1] == '\n') return data.Substring(0, data.Length - 2);
+
+            // index += await ReadToBufferAsync(data, index);
+            if (data.Length > 1 && data[^2] == '\r' && data[^1] == '\n')
+            {
+                // return System.Text.Encoding.Default.GetString(data).Substring(0, index - 2);
+                return data.Substring(0, data.Length - 2);
+            }
+
         }
     }
 }

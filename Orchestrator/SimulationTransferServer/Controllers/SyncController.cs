@@ -33,7 +33,7 @@ public class SyncController(IRobotService robotService) : ControllerBase
 
     public async Task<IActionResult> ReadColorSensor()
     {
-        var message = await robotService.ReadColorSensorData(new ReadColorSensorMessage());
+        var message = await robotService.ReadColorSensorData();
         return Ok(message);
     }
 
@@ -48,6 +48,43 @@ public class SyncController(IRobotService robotService) : ControllerBase
     public async Task<IActionResult> MoveBelt([FromBody] MoveBeltMessage message)
     {
         await robotService.MoveBelt(message);
+        return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ReadDepthSensor()
+    {
+        var result = await robotService.ReadDepthSensorMessage();
+        return Ok(result);
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> ReportTimes()
+    {
+        await robotService.ToggleReportTimes();
+        return Ok();
+    }
+
+    private static CancellationTokenSource _cancellationTokenSource = new();
+    private async Task Worker(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            Console.WriteLine("Here");
+            await Task.Delay(1000, cancellationToken);
+        }
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> StartTask()
+    {
+        Task.Run(() => Worker(_cancellationTokenSource.Token));
+        return Ok();
+    }
+    [HttpGet]
+    public async Task<IActionResult> StopTask()
+    {
+        await _cancellationTokenSource.CancelAsync();
         return Ok();
     }
 }

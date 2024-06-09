@@ -8,6 +8,7 @@ public class ConveyorBelt : MonoBehaviour
     public float speed;
     public Vector3 direction;
     public List<GameObject> onBelt;
+    Quaternion rotation = new Quaternion(0, 0, 0, 0);
 
     void Start()
     {
@@ -20,6 +21,7 @@ public class ConveyorBelt : MonoBehaviour
         {
             //item.GetComponent<Rigidbody>().velocity = direction * speed * Time.deltaTime;
             item.transform.Translate(direction * speed * Time.deltaTime);
+            item.transform.rotation = rotation;
         }
     }
 

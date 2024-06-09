@@ -21,13 +21,13 @@ void MotorDriver::moveSteps(int steps)
     remainingSteps += steps;
 }
 
-void MotorDriver::moveLength(uint16_t mm) {
+void MotorDriver::moveLength(int mm) {
     remainingSteps += mm * calibSteps / (float)calibLengthMM;
 }
 
 void MotorDriver::tick()
 {
-    int64_t now = esp_timer_get_time();
+    uint64_t now = esp_timer_get_time();
     if (now - lastStep >= stepDelay)
     {
         lastStep = now;
@@ -77,7 +77,7 @@ void MotorDriver::stepMotor(int thisStep)
         digitalWrite(_in3, LOW);
         digitalWrite(_in4, HIGH);
         break;
-    case 4: // 1001
+    case 4: // 0000
         digitalWrite(_in1, LOW);
         digitalWrite(_in2, LOW);
         digitalWrite(_in3, LOW);
