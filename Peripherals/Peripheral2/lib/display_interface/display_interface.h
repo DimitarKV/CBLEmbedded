@@ -11,6 +11,7 @@ private:
     uint16_t _colorSuccess = 0x07e0;
     uint16_t _colorFailure = 0xf800;
     uint16_t _colorWarning = 0xfc67;
+    uint16_t _colorCoolBg = 0x8dff;
     bool logMode = false;
 public:
     Display(int cs, int dc, int rst) : _tft(cs, dc, rst) {
@@ -39,12 +40,51 @@ public:
         _tft.setTextSize(2);
         _tft.print(message);
     }
+
+    void writeWithWrapToCanvas(char* message, int textSize, int padding, int x1, int y1, int x2, int y2) {
+        _tft.setTextSize(textSize);
+        _tft.fillRect(x1, y1, x2, y2, _backgroundColor);
+
+        int textLength = strlen(message);
+        int cursorX = x1 + padding;
+        int cursorY = y1 + padding;
+        _tft.fillRect(x1, y1, x2, textSize * 8 + 2 * padding, _colorCoolBg);
+
+        for (int i = 0; i < textLength; i++)
+        {
+            if(cursorX <= x2 - textSize * 8 - padding) {
+                _tft.setCursor(cursorX, cursorY);
+                _tft.print(message[i]);
+                cursorX += textSize * 8;
+            } else {
+                if(cursorY + textSize * 8 + padding > y2)
+                    break;
+
+                cursorX = x1 + padding;
+                cursorY += textSize * 8;
+                _tft.fillRect(x1, cursorY, x2, textSize * 8, _colorCoolBg);
+                _tft.setCursor(cursorX, cursorY);
+                _tft.print(message[i]);
+            }
+        }
+        
+    }
+
+    void writeCurrentOperation(char* message) {
+        uint16_t textBg = _colorCoolBg;
+        _tft.setTextColor(0);
+        _tft.setTextWrap(true);
+        writeWithWrapToCanvas(message, 2, 4, 0, 20, 240, 135);
+    }
+
     void interpretMessage(char* dataPacket) {
         char command[3];
         memcpy(command, dataPacket, 2);
         command[2] = '\0';
         if(command[0] == 's') {
             writeStatusMessage(&dataPacket[2], command[1] - '0');
+        } else if (command[0] == 'o' && command[1] == 'p') {
+            writeCurrentOperation(&dataPacket[2]);
         }
     }
 

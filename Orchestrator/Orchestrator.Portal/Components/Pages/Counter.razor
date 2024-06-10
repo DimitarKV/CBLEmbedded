@@ -1,20 +1,82 @@
 ﻿@page "/counter"
+@using System.Drawing
+@using System.Globalization
+@using System.Timers
+@using CsvHelper
+@using CsvHelper.Configuration
 @rendermode InteractiveServer
+@inject HttpClient client
 
 <PageTitle>Counter</PageTitle>
 
-<h1>Counter</h1>
+<h1>Color</h1>
 
-<p role="status">Current count: @currentCount</p>
+<div style="width: 300px; height: 300px; background-color:rgb(@Color.R, @Color.G, @Color.B)">
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+</div>
+
+<button class="btn btn-primary" @onclick="(async () => await CheckColor())">Click me</button>
+
+<InputText @bind-Value="FileName"></InputText>
+<button class="btn btn-primary" @onclick="(async () => await LogData())">Click me</button>
 
 @code {
-    private int currentCount = 0;
+    public Color Color { get; set; } = Color.Aquamarine;
+    public string FileName { get; set; }
 
-    private void IncrementCount()
+    class ColorSensorData
     {
-        currentCount++;
+        public int Red { get; set; }
+        public int Green { get; set; }
+        public int Blue { get; set; }
+        public int Clear { get; set; }
+        public int ColorTemp { get; set; }
+        public int Lux { get; set; }
+    }
+
+    private async Task Runner()
+    {
+        while (true)
+        {
+            var result = await client.GetFromJsonAsync<ColorSensorData>("Sync/ReadColorSensor") ?? new ColorSensorData();
+                    Color = Color.FromArgb(1,
+                        (byte)((0xFF) * (result.Red / (float)(0xFFFF))),
+                        (byte)((0xFF) * (result.Green / (float)(0xFFFF))),
+                        (byte)((0xFF) * (result.Blue / (float)(0xFFFF))));
+            await InvokeAsync(StateHasChanged);
+            await Task.Delay(500);
+        }
+        
+    }
+
+    private async Task CheckColor()
+    {
+        new Thread(async () => await Runner()).Start();
+    }
+
+    private async Task LogData()
+    {
+        var result = await client.GetFromJsonAsync<ColorSensorData>("Sync/ReadColorSensor");
+        if (result is null)
+            return;
+
+        Color = Color.FromArgb(1,
+            (byte)((0xFF) * (result.Red / (float)(0xFFFF))),
+            (byte)((0xFF) * (result.Green / (float)(0xFFFF))),
+            (byte)((0xFF) * (result.Blue / (float)(0xFFFF))));
+
+    // Append to the file.
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+    // Don't write the header again.
+            HasHeaderRecord = false,
+        };
+        using (var stream = File.Open(FileName + ".csv", FileMode.Append))
+        using (var writer = new StreamWriter(stream))
+        using (var csv = new CsvWriter(writer, config))
+        {
+            await csv.WriteRecordsAsync(new List<ColorSensorData>() {result});
+        }
     }
 
 }
