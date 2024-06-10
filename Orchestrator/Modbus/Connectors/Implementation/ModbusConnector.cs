@@ -152,9 +152,9 @@ public class ModbusConnector : PortConnector, IModbusConnector
             finally
             {
                 watch.Stop();
-                _logger.LogInformation("Operation took: {0}ms", watch.Elapsed.Milliseconds);
+                //_logger.LogInformation("Operation took: {0}ms", watch.Elapsed.Milliseconds);
             }
-            _logger.LogInformation("Received: {0}", ack);
+            //_logger.LogInformation("Received: {0}", ack);
             if (ack is not null && ack.Length >= 3 && ack.Substring(ack.Length - 3, 3) == "ACK")
             {
                 var responseData = ack.Substring(0, ack.Length - 3);

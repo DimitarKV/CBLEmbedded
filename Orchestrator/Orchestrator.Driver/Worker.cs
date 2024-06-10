@@ -6,15 +6,17 @@ using ServiceLayer.Types;
 
 namespace Orchestrator.Driver;
 
-public class Worker(IRobotService robotService, IConfiguration configuration) : BackgroundService
+public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfiguration configuration) : BackgroundService
 {
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
 
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
+    private readonly List<int> weights = new() { 0, 0, 0 };
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Play initialization sound
         while (!stoppingToken.IsCancellationRequested)
         {
             await OpenBarrierAsync(false);
@@ -29,15 +31,16 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
                 { Distance = _options.BarrierAdjustmentDistance }); //by 20mm
             await WaitMotorStopAsync();
             await HandleObject();
-            // break;
-            // if (stopProcess == true)
-            // {
-            //     break;
-            // }
         }
     }
 
-    private static int counter = 0;
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
+        await OpenBarrierAsync();
+    }
+
+    // private static int counter = 0;
 
     private async Task HandleObject()
     {
@@ -48,90 +51,27 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         await MoveBeltAsync(_options.BarrierColorSensorDistance - _options.BarrierPassingDistance);
         await WaitMotorStopAsync();
 
-        await Task.Delay(200);
+        await Task.Delay(_options.ColorSensor.WaitTimeMs);
         string objectName = await ClassifyObjectWithColorSensorAsync(); //get the color
+        
+        int minimalWeight = -1;
+        if (objectName == "white_disc")
+        {
+            minimalWeight = GetMinimalWeight(weights[0], weights[1], weights[2], 10);
+        } else if (objectName == "black_disc")
+        {
+            minimalWeight = GetMinimalWeight(weights[0], weights[1], weights[2], 20);
+        } else if (objectName == "empty")
+        {
+            
+        }
+        
         await robotService.WriteToDisplay(new WriteToDisplayMessage("op" + objectName));
 
         await MoveBeltAsync(_options.ColorSensorPusherDistance);
-        await MoveBeltAsync(_options.InterPusherDistance * (counter % 3));
-        await PushAsync(counter % 3);
-        counter++;
+        
+        
 
-
-        // if (objectType == "white_disc")
-        // {
-            // int minimalWeight = getMinimalWeight(weight1, weight2, weight3, 10);
-            // switch (minimalWeight)
-            // {
-            //     case 0: RobotService.WriteToDisplay();//Write "Containers full. Empty!"
-            //         stopProcess = true;
-            //         break;
-            //     case 1: RobotService.MoveBelt();//by 45mm
-            //         RobotService.SetServoPos();//move servo1 forward
-            //         RobotService.SetServoPos();//move servo1 backward
-            //         weight1 += 10;
-            //         if (weight1 == 40)
-            //         {
-            //             RobotService.SetLEDOn();//set led1 on
-            //         }
-            //         break;
-            //     case 2: RobotService.MoveBelt();//by 120mm
-            //         RobotService.SetServoPos();//move servo2 forward
-            //         RobotService.SetServoPos();//move servo2 backward
-            //         weight2 += 10;
-            //         if (weight2 == 40)
-            //         {
-            //             RobotService.SetLEDOn();//set led2 on
-            //         }
-            //         break;
-            //     case 3: RobotService.MoveBelt();//by 180mm
-            //         RobotService.SetServoPos();//move servo2 forward
-            //         RobotService.SetServoPos();//move servo2 backward
-            //         weight3 += 10;
-            //         if (weight3 == 40)
-            //         {
-            //             RobotService.SetLEDOn();//set led3 on
-            //         }
-            //         break;
-            // }
-        // }
-        // else if (colorCurrObj == "Black")
-        // {
-        //     int minimalWeight = getMinimalWeight(weight1, weight2, weight3, 10);
-        //     switch (minimalWeight)
-        //     {
-        //         case 0: RobotService.WriteToDisplay();//Write "Containers full. Empty!"
-        //             stopProcess = true;
-        //             break;
-        //         case 1: RobotService.MoveBelt();//by 30mm
-        //             RobotService.SetServoPos();//move servo1 forward
-        //             RobotService.SetServoPos();//move servo1 backward
-        //             weight1 += 20;
-        //             if (weight1 == 40)
-        //             {
-        //                 RobotService.SetLEDOn();//set led1 on
-        //             }
-        //             break;
-        //         case 2: RobotService.MoveBelt();//by 120mm
-        //             RobotService.SetServoPos();//move servo2 forward
-        //             RobotService.SetServoPos();//move servo2 backward
-        //             weight2 += 20;
-        //             if (weight2 == 40)
-        //             {
-        //                 RobotService.SetLEDOn();//set led2 on
-        //             }
-        //             break;
-        //         case 3: RobotService.MoveBelt();//by 180mm
-        //             RobotService.SetServoPos();//move servo2 forward
-        //             RobotService.SetServoPos();//move servo2 backward
-        //             weight3 += 20;
-        //             if (weight3 == 40)
-        //             {
-        //                 RobotService.SetLEDOn();//set led3 on
-        //             }
-        //             break;
-        //     }
-        // }
         // else
         // {
         //     RobotService.MoveBelt();//by 170mm
@@ -145,31 +85,63 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
         // }
     }
     //
-    // int getMinimalWeight(int weight1, int weight2, int weight3, int discWeight)
-    // {
-    //     if (weight1 <= weight2 && weight1 <= weight3)
-    //     {
-    //         if (discWeight + weight1 > 40)
-    //         {
-    //             return 0;
-    //         }
-    //         return 1;
-    //     } 
-    //     else if (weight2 <= weight1 && weight2 <= weight3)
-    //     {
-    //         if (discWeight + weight2 > 40)
-    //         {
-    //             return 0;
-    //         }
-    //         return 2;
-    //     } 
-    //     if (discWeight + weight3 > 40)
-    //     {
-    //         return 0;
-    //     }
-    //     return 3;
-    // }
+    int GetMinimalWeight(int weight1, int weight2, int weight3, int discWeight)
+    {
+        if (weight1 <= weight2 && weight1 <= weight3)
+        {
+            if (discWeight + weight1 > 40)
+            {
+                return 0;
+            }
+            return 1;
+        } 
+        else if (weight2 <= weight1 && weight2 <= weight3)
+        {
+            if (discWeight + weight2 > 40)
+            {
+                return 0;
+            }
+            return 2;
+        } 
+        if (discWeight + weight3 > 40)
+        {
+            return 0;
+        }
+        return 3;
+    }
 
+    enum DisplayMessageTypeEnum
+    {
+        STATUSS_OK,
+        STATUSS_WARNING,
+        STATUSS_ERROR,
+        MESSAGE,
+        CURRENT_OP
+    }
+
+    private async Task WriteToDisplay(DisplayMessageTypeEnum messageType, string text)
+    {
+        switch (messageType)
+        {
+            case DisplayMessageTypeEnum.STATUSS_OK:
+                text.Insert(0, "s0");
+                break;
+            case DisplayMessageTypeEnum.STATUSS_WARNING:
+                text.Insert(0, "s1");
+                break;
+            case DisplayMessageTypeEnum.STATUSS_ERROR:
+                text.Insert(0, "s9");
+                break;
+            case DisplayMessageTypeEnum.MESSAGE:
+                break;
+            case DisplayMessageTypeEnum.CURRENT_OP:
+                text.Insert(0, "op");
+                break;
+        }
+
+        var response = await robotService.WriteToDisplay(new WriteToDisplayMessage(text));
+    }
+    
     private async Task<bool> ObjectAtBarrierAsync()
     {
         var depthSensorResponse = await robotService.ReadDepthSensorMessage();
@@ -260,6 +232,7 @@ public class Worker(IRobotService robotService, IConfiguration configuration) : 
     private async Task<string> ClassifyObjectWithColorSensorAsync()
     {
         ReadColorSensorMessage colorSensorMessage = (await robotService.ReadColorSensorData()).Data!;
+        logger.LogInformation(colorSensorMessage.Lux.ToString());
         var objectName = _colorSensorInterpreter.ColorFind(new Point(colorSensorMessage.Red, colorSensorMessage.Green,
             colorSensorMessage.Blue));
         return objectName;
