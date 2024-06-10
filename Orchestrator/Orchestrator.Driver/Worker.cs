@@ -1,17 +1,19 @@
 using Orchestrator.Driver.Config;
 using Orchestrator.Driver.Config.ColorSensor;
 using ServiceLayer.Services;
+using ServiceLayer.Services.Implementation;
 using ServiceLayer.Types;
 
 namespace Orchestrator.Driver;
 
-public class Worker(IRobotService robotService, IConfiguration configuration) : BackgroundService
+public class Worker(IRobotService robotService, IConfiguration configuration, IRobotSoundService robotSoundService) : BackgroundService
 {
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
-
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await robotSoundService.PlaySound(_options.StartingSound);
         while (!stoppingToken.IsCancellationRequested)
         {
             await OpenBarrierAsync(false);

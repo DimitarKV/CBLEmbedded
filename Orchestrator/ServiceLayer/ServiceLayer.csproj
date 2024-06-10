@@ -16,4 +16,8 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="NetCoreAudio" Version="2.0.0" />
+    </ItemGroup>
+
 </Project>
