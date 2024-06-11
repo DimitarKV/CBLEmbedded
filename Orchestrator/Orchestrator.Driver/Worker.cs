@@ -45,6 +45,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task HandleObject()
     {
+        await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_OK, "All systems up!");
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Letting object pass!");
         await OpenBarrierAsync();
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Traversing to color sensor!");
@@ -57,7 +58,11 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Classifying object!");
         await Task.Delay(_options.ColorSensor.WaitTimeMs);
         string objectName = await ClassifyObjectWithColorSensorAsync(); //get the color
-        
+        await HandleKnownObject(objectName);
+    }
+
+    private async Task HandleKnownObject(string objectName)
+    {
         int minimalWeight = -1;
         int weight = 0;
         if (objectName == "white_disc")
@@ -78,30 +83,16 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         {
             
         }
-
-        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object: " + objectName); 
+        
         if (minimalWeight > 0)
         {
+            await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Moving " + objectName + " to bin " + minimalWeight); 
             await MoveBeltAsync(_options.ColorSensorPusherDistance + (minimalWeight - 1) * _options.InterPusherDistance);
             await PushAsync(minimalWeight - 1);
             weights[minimalWeight - 1] += weight;
         }
-        
-        
-        
-
-        // else
-        // {
-        //     RobotService.MoveBelt();//by 170mm
-        // }
-        //
-        // //Check for full containers
-        // if (weight1 == 40 && weight2 == 40 && weight3 == 40)
-        // {
-        //     RobotService.WriteToDisplay();//Write "Containers full. Empty!"
-        //     stopProcess = true;
-        // }
     }
+
     //
     int GetMinimalWeight(int weight1, int weight2, int weight3, int discWeight)
     {

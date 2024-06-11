@@ -53,10 +53,10 @@ public:
 
         for (int i = 0; i < textLength; i++)
         {
-            if(cursorX <= x2 - textSize * 8 - padding) {
+            if(cursorX <= x2 - textSize * 6 - padding) {
                 _tft.setCursor(cursorX, cursorY);
                 _tft.print(message[i]);
-                cursorX += textSize * 8;
+                cursorX += textSize * 6;
             } else {
                 if(cursorY + textSize * 8 + padding > y2)
                     break;
