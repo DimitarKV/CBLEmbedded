@@ -16,16 +16,17 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
         // Play initialization sound
         while (!stoppingToken.IsCancellationRequested)
         {
             await OpenBarrierAsync(false);
             await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = true });
+            await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Awaiting object!");
             while (!await ObjectAtBarrierAsync())
             {
                 await Task.Delay(100, stoppingToken);
             }
-
             await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
             await robotService.MoveBelt(new MoveBeltMessage()
                 { Distance = _options.BarrierAdjustmentDistance }); //by 20mm
@@ -44,31 +45,48 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task HandleObject()
     {
+        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Letting object pass!");
         await OpenBarrierAsync();
+        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Traversing to color sensor!");
         await MoveBeltAsync(_options.BarrierPassingDistance);
         await WaitMotorStopAsync();
         await OpenBarrierAsync(false);
         await MoveBeltAsync(_options.BarrierColorSensorDistance - _options.BarrierPassingDistance);
         await WaitMotorStopAsync();
 
+        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Classifying object!");
         await Task.Delay(_options.ColorSensor.WaitTimeMs);
         string objectName = await ClassifyObjectWithColorSensorAsync(); //get the color
         
         int minimalWeight = -1;
+        int weight = 0;
         if (objectName == "white_disc")
         {
+            weight = 10;
             minimalWeight = GetMinimalWeight(weights[0], weights[1], weights[2], 10);
         } else if (objectName == "black_disc")
         {
+            weight = 20;
             minimalWeight = GetMinimalWeight(weights[0], weights[1], weights[2], 20);
-        } else if (objectName == "empty")
+        } 
+        else if (objectName == "none")
+        {
+            await ThrowToTrash();
+            return;
+        } 
+        else if (objectName == "empty")
         {
             
         }
-        
-        await robotService.WriteToDisplay(new WriteToDisplayMessage("op" + objectName));
 
-        await MoveBeltAsync(_options.ColorSensorPusherDistance);
+        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object: " + objectName); 
+        if (minimalWeight > 0)
+        {
+            await MoveBeltAsync(_options.ColorSensorPusherDistance + (minimalWeight - 1) * _options.InterPusherDistance);
+            await PushAsync(minimalWeight - 1);
+            weights[minimalWeight - 1] += weight;
+        }
+        
         
         
 
@@ -124,22 +142,28 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         switch (messageType)
         {
             case DisplayMessageTypeEnum.STATUSS_OK:
-                text.Insert(0, "s0");
+                text = text.Insert(0, "s0");
                 break;
             case DisplayMessageTypeEnum.STATUSS_WARNING:
-                text.Insert(0, "s1");
+                text = text.Insert(0, "s1");
                 break;
             case DisplayMessageTypeEnum.STATUSS_ERROR:
-                text.Insert(0, "s9");
+                text = text.Insert(0, "s9");
                 break;
             case DisplayMessageTypeEnum.MESSAGE:
+                text = text.Insert(0, "me");
                 break;
             case DisplayMessageTypeEnum.CURRENT_OP:
-                text.Insert(0, "op");
+                text = text.Insert(0, "op");
                 break;
         }
 
         var response = await robotService.WriteToDisplay(new WriteToDisplayMessage(text));
+    }
+
+    private async Task ThrowToTrash()
+    {
+        await MoveBeltAsync(_options.ColorSensorToTrashDistance);
     }
     
     private async Task<bool> ObjectAtBarrierAsync()

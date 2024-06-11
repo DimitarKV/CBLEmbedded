@@ -12,7 +12,6 @@
 
     <ItemGroup>
       <Reference Include="Microsoft.AspNetCore">
-        <HintPath>C:\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.0\Microsoft.AspNetCore.dll</HintPath>
       </Reference>
     </ItemGroup>
 

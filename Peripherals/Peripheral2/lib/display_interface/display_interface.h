@@ -12,6 +12,7 @@ private:
     uint16_t _colorFailure = 0xf800;
     uint16_t _colorWarning = 0xfc67;
     uint16_t _colorCoolBg = 0x8dff;
+    uint16_t _colorMessageBg= 0xc79a;
     bool logMode = false;
 public:
     Display(int cs, int dc, int rst) : _tft(cs, dc, rst) {
@@ -74,7 +75,14 @@ public:
         uint16_t textBg = _colorCoolBg;
         _tft.setTextColor(0);
         _tft.setTextWrap(true);
-        writeWithWrapToCanvas(message, 2, 4, 0, 20, 240, 135);
+        writeWithWrapToCanvas(message, 2, 4, 0, 20, 240, 95);
+    }
+
+    void writeSimpleMessage(char* message) {
+        uint16_t textBg = _colorMessageBg;
+        _tft.setTextColor(0);
+        _tft.setTextWrap(true);
+        writeWithWrapToCanvas(message, 2, 4, 0, 95, 240, 135);
     }
 
     void interpretMessage(char* dataPacket) {
@@ -85,6 +93,8 @@ public:
             writeStatusMessage(&dataPacket[2], command[1] - '0');
         } else if (command[0] == 'o' && command[1] == 'p') {
             writeCurrentOperation(&dataPacket[2]);
+        } else if (command[0] == 'm' && command[1] == 'e') {
+            writeSimpleMessage(&dataPacket[2]);
         }
     }
 

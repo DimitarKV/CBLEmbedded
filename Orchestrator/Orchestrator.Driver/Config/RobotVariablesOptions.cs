@@ -19,4 +19,5 @@ public class RobotVariablesOptions
     public int ColorSensorPusherDistance { get; set; }
     public int InterPusherDistance { get; set; }
     public int PusherMoveDelayMs { get; set; }
+    public int ColorSensorToTrashDistance { get; set; }
 }
