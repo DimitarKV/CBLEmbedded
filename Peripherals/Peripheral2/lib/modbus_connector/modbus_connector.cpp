@@ -107,14 +107,14 @@ void ModbusConnector::processModbusCommand(ModbusPacket packet)
             this->processors[packet.function](packet);
         sendModbusResponsePart();
         Serial.println("ACK");
-        Serial1.println("Send: ACK");
-        Serial1.print("Time to process request: ");
-        Serial1.println(esp_timer_get_time() - packetReceive);
+        // Serial1.println("Send: ACK");
+        // Serial1.print("Time to process request: ");
+        // Serial1.println(esp_timer_get_time() - packetReceive);
     }
     else
     {
         Serial.println("NACK");
-        Serial1.println("Send: NACK");
+        // Serial1.println("Send: NACK");
     }
 }
 

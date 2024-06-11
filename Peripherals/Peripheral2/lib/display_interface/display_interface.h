@@ -90,6 +90,7 @@ public:
         memcpy(command, dataPacket, 2);
         command[2] = '\0';
         if(command[0] == 's') {
+            Serial1.println(dataPacket);
             writeStatusMessage(&dataPacket[2], command[1] - '0');
         } else if (command[0] == 'o' && command[1] == 'p') {
             writeCurrentOperation(&dataPacket[2]);

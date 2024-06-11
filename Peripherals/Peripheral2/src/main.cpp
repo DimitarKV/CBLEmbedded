@@ -39,6 +39,7 @@ void HandleConnector(void *parameter)
 
 void writeToDisplay(ModbusPacket inputPacket)
 {
+  Serial1.println((char*)inputPacket.data);
   display.interpretMessage((char *)inputPacket.data);
 }
 
@@ -64,7 +65,6 @@ void setServoAngles(ModbusPacket packet)
 
 void setServoProgressions(ModbusPacket packet)
 {
-  Serial1.println(packet.dataLength);
   if (packet.dataLength % 2 == 0)
   {
     servoController.setServoProgressions(packet.data, packet.dataLength);
