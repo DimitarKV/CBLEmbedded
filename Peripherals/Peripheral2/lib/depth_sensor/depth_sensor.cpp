@@ -1,5 +1,9 @@
 #include "depth_sensor.h"
 
+/**
+ * Determines the behavior of the depth sensor.
+ * Receives data and converts it in the needed form for the project. 
+ */
 bool DepthSensor::init(){
     if(!vl.begin()) {
         _status = NOT_RESPONDING;
