@@ -44,7 +44,7 @@ public class ColorSensorInterpreter
     {
         new Cylinder(new Point(1600, 2600, 2000),
             new Point(2400, 3600, 2650),
-            250, "black_disc"),
+                250, "black_disc"),
         new Cylinder(new Point(48000, 64800, 44000),
             new Point(66000, 66500, 61000),
             2500, "white_disc"),

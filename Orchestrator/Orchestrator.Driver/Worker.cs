@@ -12,10 +12,12 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
 
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
-    private readonly List<int> weights = new() { 0, 0, 0 };
+    private readonly List<int> weights = new() { 30, 30, 30 };
+    
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_OK, "All systems are up and r!");
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
         // Play initialization sound
         while (!stoppingToken.IsCancellationRequested)
@@ -45,7 +47,6 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task HandleObject()
     {
-        await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_OK, "All systems up!");
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Letting object pass!");
         await OpenBarrierAsync();
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Traversing to color sensor!");
@@ -81,7 +82,8 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         } 
         else if (objectName == "empty")
         {
-            
+            await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object possibly taken from belt!");
+            return;
         }
         
         if (minimalWeight > 0)
@@ -90,6 +92,18 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
             await MoveBeltAsync(_options.ColorSensorPusherDistance + (minimalWeight - 1) * _options.InterPusherDistance);
             await PushAsync(minimalWeight - 1);
             weights[minimalWeight - 1] += weight;
+        }
+        else
+        {
+            await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Bins full, please empty and press Enter!");
+            Console.ReadLine(); // After this point we expect the bins to be empty.
+            for (int i = 0; i < weights.Count; i++)
+            {
+                weights[i] = 0;
+            }
+
+            await 
+                HandleKnownObject(objectName);
         }
     }
 
@@ -154,6 +168,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task ThrowToTrash()
     {
+        await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP, "Moving foreign object to trash!");
         await MoveBeltAsync(_options.ColorSensorToTrashDistance);
     }
     

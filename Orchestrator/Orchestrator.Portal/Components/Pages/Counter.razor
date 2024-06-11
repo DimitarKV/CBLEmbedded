@@ -4,6 +4,7 @@
 @using System.Timers
 @using CsvHelper
 @using CsvHelper.Configuration
+@using Modbus.Types
 @rendermode InteractiveServer
 @inject HttpClient client
 
@@ -34,15 +35,27 @@
         public int Lux { get; set; }
     }
 
+    class ApiResponse
+    {
+        public ColorSensorData Data { get; set; }
+        public int DeviceStatus { get; set; }
+        public bool Success { get; set; }
+    }
+
     private async Task Runner()
     {
         while (true)
         {
-            var result = await client.GetFromJsonAsync<ColorSensorData>("Sync/ReadColorSensor") ?? new ColorSensorData();
+            var result = await client.GetFromJsonAsync<ApiResponse>("Sync/ReadColorSensor") ?? new ApiResponse();
+            if (!result.Success)
+            {
+                await Task.Delay(1000);
+            }
+                
                     Color = Color.FromArgb(1,
-                        (byte)((0xFF) * (result.Red / (float)(0xFFFF))),
-                        (byte)((0xFF) * (result.Green / (float)(0xFFFF))),
-                        (byte)((0xFF) * (result.Blue / (float)(0xFFFF))));
+                        (byte)((0xFF) * (result.Data.Red / (float)(0xFFFF))),
+                        (byte)((0xFF) * (result.Data.Green / (float)(0xFFFF))),
+                        (byte)((0xFF) * (result.Data.Blue / (float)(0xFFFF))));
             await InvokeAsync(StateHasChanged);
             await Task.Delay(500);
         }
@@ -56,14 +69,14 @@
 
     private async Task LogData()
     {
-        var result = await client.GetFromJsonAsync<ColorSensorData>("Sync/ReadColorSensor");
+        var result = await client.GetFromJsonAsync<ApiResponse>("Sync/ReadColorSensor");
         if (result is null)
             return;
 
         Color = Color.FromArgb(1,
-            (byte)((0xFF) * (result.Red / (float)(0xFFFF))),
-            (byte)((0xFF) * (result.Green / (float)(0xFFFF))),
-            (byte)((0xFF) * (result.Blue / (float)(0xFFFF))));
+            (byte)((0xFF) * (result.Data.Red / (float)(0xFFFF))),
+            (byte)((0xFF) * (result.Data.Green / (float)(0xFFFF))),
+            (byte)((0xFF) * (result.Data.Blue / (float)(0xFFFF))));
 
     // Append to the file.
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -75,7 +88,7 @@
         using (var writer = new StreamWriter(stream))
         using (var csv = new CsvWriter(writer, config))
         {
-            await csv.WriteRecordsAsync(new List<ColorSensorData>() {result});
+            await csv.WriteRecordsAsync(new List<ColorSensorData>() {result.Data});
         }
     }
 
