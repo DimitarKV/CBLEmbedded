@@ -6,6 +6,9 @@ using ServiceLayer.Types;
 
 namespace Orchestrator.Driver;
 
+/// <summary>
+/// Implements the whole logic of the robot using commands in the service layer.
+/// </summary>
 public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfiguration configuration) : BackgroundService
 {
     private readonly RobotVariablesOptions _options =
