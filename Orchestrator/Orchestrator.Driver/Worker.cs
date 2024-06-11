@@ -2,22 +2,22 @@ using Orchestrator.Driver.Config;
 using Orchestrator.Driver.Config.ColorSensor;
 using ServiceLayer.Helpers;
 using ServiceLayer.Services;
+using ServiceLayer.Services.Implementation;
 using ServiceLayer.Types;
 
 namespace Orchestrator.Driver;
 
-public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfiguration configuration) : BackgroundService
+public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfiguration configuration, IRobotSoundService robotSoundService) : BackgroundService
 {
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
-
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
     private readonly List<int> weights = new() { 0, 0, 0 };
-
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
-        // Play initialization sound
+        robotSoundService.PlaySound(_options.Audio["StartingSound"]);
         while (!stoppingToken.IsCancellationRequested)
         {
             await OpenBarrierAsync(false);
