@@ -10,4 +10,9 @@
       <ProjectReference Include="..\Modbus\Modbus.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore">
+      </Reference>
+    </ItemGroup>
+
 </Project>
