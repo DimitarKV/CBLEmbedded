@@ -1,9 +1,5 @@
 #include "color_sensor.h"
 
-/**
- * Determines the behavior of the color sensor.
- * Receives data and converts it in the needed form for the project. 
- */
 ColorSensor::ColorSensor(int sda, int scl)
 {
   sdaPin = sda;

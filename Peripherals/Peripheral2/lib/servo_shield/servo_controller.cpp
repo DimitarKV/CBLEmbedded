@@ -1,10 +1,5 @@
 #include "servo_controller.h"
 
-/**
- * Manages multiple servos using the PCA9685 PWM driver.
- * It provides methods to initialize the controller, add and configure servos, 
- * set angles immediately, and control servo progression.
- */ 
 int ServoController::convertAngleToPosition(byte angle)
 {
     return (angle * (SERVOMAX - SERVOMIN) / 180.0f) + SERVOMIN;

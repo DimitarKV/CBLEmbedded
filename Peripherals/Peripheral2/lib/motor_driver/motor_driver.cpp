@@ -2,11 +2,6 @@
 #include <motor_driver.h>
 #include <../ErrorProneDevice.h>
 
-/**
- * Controls a motor using four input pins.
- * It provides methods to initialize the motor, move it by steps or length, 
- * check its status, and handle continuous movement.
- */
 MotorDriver::MotorDriver(int in1, int in2, int in3, int in4)
 {
     _in1 = in1;

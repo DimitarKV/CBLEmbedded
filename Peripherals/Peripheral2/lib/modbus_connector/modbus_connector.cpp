@@ -2,10 +2,6 @@
 
 uint64_t packetReceive = 0;
 
-/**
- * Handles Modbus communication over a serial connection.
- * It includes methods for reading, decoding, processing, and responding to Modbus commands.
- */
 int ModbusConnector::extractNullTerminatedLength(char *buffer)
 {
     int index = 0;

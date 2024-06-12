@@ -4,10 +4,6 @@
 #include <Adafruit_ST7789.h>
 #include <Adafruit_GFX.h>
 
-/**
- * Determines the behavior of the display.
- * Writes different type of messages depending on the state of the robot. 
- */
 class Display {
 private:
     Adafruit_ST7789 _tft;
@@ -19,6 +15,10 @@ private:
     uint16_t _colorMessageBg= 0xc79a;
     bool logMode = false;
 public:
+/**
+ * Determines the behavior of the display.
+ * Writes different type of messages depending on the state of the robot. 
+ */
     Display(int cs, int dc, int rst) : _tft(cs, dc, rst) {
     }
 
