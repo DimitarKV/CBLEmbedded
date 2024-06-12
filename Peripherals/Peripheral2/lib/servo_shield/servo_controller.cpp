@@ -50,7 +50,7 @@ void ServoController::setServoProgression(byte servonum, byte value)
 
     setImmediateAngle(servonum, angle);
 
-    Serial1.println(angle);
+    //Serial1.println(angle);
 }
 
 void ServoController::setImmediateAngles(byte *message, int length)

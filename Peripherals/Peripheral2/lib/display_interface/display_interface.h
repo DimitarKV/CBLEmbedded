@@ -53,7 +53,7 @@ public:
 
         for (int i = 0; i < textLength; i++)
         {
-            if(cursorX <= x2 - textSize * 6 - padding) {
+            if(cursorX < x2 - textSize * 6 - padding) {
                 _tft.setCursor(cursorX, cursorY);
                 _tft.print(message[i]);
                 cursorX += textSize * 6;
@@ -90,7 +90,7 @@ public:
         memcpy(command, dataPacket, 2);
         command[2] = '\0';
         if(command[0] == 's') {
-            Serial1.println(dataPacket);
+            //Serial1.println(dataPacket);
             writeStatusMessage(&dataPacket[2], command[1] - '0');
         } else if (command[0] == 'o' && command[1] == 'p') {
             writeCurrentOperation(&dataPacket[2]);

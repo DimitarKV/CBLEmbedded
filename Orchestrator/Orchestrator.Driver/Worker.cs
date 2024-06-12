@@ -1,5 +1,8 @@
+using Modbus.Types;
+using Modbus.Types.Interfaces;
 using Orchestrator.Driver.Config;
 using Orchestrator.Driver.Config.ColorSensor;
+using Orchestrator.Driver.Exceptions;
 using ServiceLayer.Helpers;
 using ServiceLayer.Services;
 using ServiceLayer.Types;
@@ -13,27 +16,43 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
     private readonly List<int> weights = new() { 30, 30, 30 };
+    public bool AllGood { get; set; } = true;
+    public string StatusMessage { get; set; } = "";
+    public string SimpleMessage { get; set; } = "";
+    public string CurrentOperation { get; set; } = "";
     
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_OK, "All systems are up and r!");
+        
+        // await Task.Delay(500);
+        await LightAllLights(false);
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
         // Play initialization sound
         while (!stoppingToken.IsCancellationRequested)
         {
-            await OpenBarrierAsync(false);
-            await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = true });
-            await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Awaiting object!");
-            while (!await ObjectAtBarrierAsync())
+            try
             {
-                await Task.Delay(100, stoppingToken);
+                await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP,
+                    "B3:" + weights[2] + " " + "B2:" + weights[1] + " " + "B1:" + weights[0]);
+                await OpenBarrierAsync(false);
+                await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = true });
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Awaiting object!");
+                while (!await ObjectAtBarrierAsync())
+                {
+                    await Task.Delay(100, stoppingToken);
+                }
+                await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
+                await robotService.MoveBelt(new MoveBeltMessage()
+                    { Distance = _options.BarrierAdjustmentDistance }); //by 20mm
+                await WaitMotorStopAsync();
+                await HandleObject();
             }
-            await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
-            await robotService.MoveBelt(new MoveBeltMessage()
-                { Distance = _options.BarrierAdjustmentDistance }); //by 20mm
-            await WaitMotorStopAsync();
-            await HandleObject();
+            catch (Exception e)
+            {
+                continue;
+            }
+            
         }
     }
 
@@ -83,6 +102,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         else if (objectName == "empty")
         {
             await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object possibly taken from belt!");
+            await Task.Delay(3000);
             return;
         }
         
@@ -92,11 +112,14 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
             await MoveBeltAsync(_options.ColorSensorPusherDistance + (minimalWeight - 1) * _options.InterPusherDistance);
             await PushAsync(minimalWeight - 1);
             weights[minimalWeight - 1] += weight;
+            await DisplayBinsOnLeds();
         }
         else
         {
             await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Bins full, please empty and press Enter!");
+            await LightAllLights();
             Console.ReadLine(); // After this point we expect the bins to be empty.
+            await LightAllLights(false);
             for (int i = 0; i < weights.Count; i++)
             {
                 weights[i] = 0;
@@ -107,6 +130,18 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         }
     }
 
+    private async Task DisplayBinsOnLeds()
+    {
+        SetLedStatesMessage message = new SetLedStatesMessage() { States = new []{weights[0] >= 40, weights[1] >= 40, weights[2] >= 40, false, false, false, false, false}};
+        await robotService.SetLedStatesAsync(message);
+    }
+    
+    private async Task LightAllLights(bool light = true)
+    {
+        SetLedStatesMessage message = new SetLedStatesMessage() { States = new []{light, light, light, false, false, false, false, false}};
+        await robotService.SetLedStatesAsync(message);
+    }
+    
     //
     int GetMinimalWeight(int weight1, int weight2, int weight3, int discWeight)
     {
@@ -148,22 +183,38 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         {
             case DisplayMessageTypeEnum.STATUSS_OK:
                 text = text.Insert(0, "s0");
+                if(text == StatusMessage)
+                    return;
+                StatusMessage = text;
                 break;
             case DisplayMessageTypeEnum.STATUSS_WARNING:
                 text = text.Insert(0, "s1");
+                if(text == StatusMessage)
+                    return;
+                StatusMessage = text;
                 break;
             case DisplayMessageTypeEnum.STATUSS_ERROR:
                 text = text.Insert(0, "s9");
+                if(text == StatusMessage)
+                    return;
+                StatusMessage = text;
                 break;
             case DisplayMessageTypeEnum.MESSAGE:
                 text = text.Insert(0, "me");
+                if(text == SimpleMessage)
+                    return;
+                SimpleMessage = text;
                 break;
             case DisplayMessageTypeEnum.CURRENT_OP:
                 text = text.Insert(0, "op");
+                if(text == CurrentOperation)
+                    return;
+                CurrentOperation = text;
                 break;
         }
 
         var response = await robotService.WriteToDisplay(new WriteToDisplayMessage(text));
+        // await ThrowIfInvalidResponse(response);
     }
 
     private async Task ThrowToTrash()
@@ -175,6 +226,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
     private async Task<bool> ObjectAtBarrierAsync()
     {
         var depthSensorResponse = await robotService.ReadDepthSensorMessage();
+        await ThrowIfInvalidResponse(depthSensorResponse);
         if (depthSensorResponse.Success && depthSensorResponse.Data is not null)
         {
             int depthSensorRange = depthSensorResponse.Data.Range;
@@ -191,7 +243,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task OpenBarrierAsync(bool open = true)
     {
-        await robotService
+        var response = await robotService
             .SetServoProgressions(
                 new SetServoProgressionsMessage()
                 {
@@ -201,12 +253,13 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
                             { ServoId = 0, Progression = open ? (byte)0 : (byte)255 }
                     }
                 });
+        await ThrowIfInvalidResponse(response);
         await Task.Delay(_options.InterOperationDelayMs);
     }
 
     private async Task PushAsync(int pusherNumber)
     {
-        await robotService
+        var response = await robotService
             .SetServoProgressions(
                 new SetServoProgressionsMessage()
                 {
@@ -216,8 +269,9 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
                             { ServoId = (byte)(pusherNumber + 1), Progression = 255 }
                     }
                 });
+        await ThrowIfInvalidResponse(response);
         await Task.Delay(_options.PusherMoveDelayMs);
-        await robotService
+        response = await robotService
             .SetServoProgressions(
                 new SetServoProgressionsMessage()
                 {
@@ -227,18 +281,22 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
                             { ServoId = (byte)(pusherNumber + 1), Progression = 0 }
                     }
                 });
+        await ThrowIfInvalidResponse(response);
         await Task.Delay(_options.PusherMoveDelayMs);
     }
 
     private async Task MoveBeltAsync(int distance)
     {
-        await robotService.MoveBelt(new MoveBeltMessage() { Distance = distance });
+        await ThrowIfInvalidResponse(
+        await robotService.MoveBelt(new MoveBeltMessage() { Distance = distance })
+        );
         await WaitMotorStopAsync();
     }
 
     private async Task<bool> MotorStillMovingAsync()
     {
         var motorStillMovingResponse = await robotService.IsMotorMoving();
+        await ThrowIfInvalidResponse(motorStillMovingResponse);
         if (motorStillMovingResponse.Success && motorStillMovingResponse.Data is not null)
             return motorStillMovingResponse.Data.isMoving;
         return true;
@@ -259,12 +317,52 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
                Math.Abs(message.Blue - identifiableObject.Blue) <= identifiableObject.Deviation;
     }
 
-    private async Task<string> ClassifyObjectWithColorSensorAsync()
+    private bool ValidResponse<T>(ModbusResponse<T> response) where T : IModbusDeserializable<T>
     {
-        ReadColorSensorMessage colorSensorMessage = (await robotService.ReadColorSensorData()).Data!;
-        logger.LogInformation(colorSensorMessage.Lux.ToString());
-        var objectName = _colorSensorInterpreter.ColorFind(new Point(colorSensorMessage.Red, colorSensorMessage.Green,
-            colorSensorMessage.Blue));
+        return response.Success && response.DeviceStatus == 0 && response.Data is not null;
+    }
+    private async Task<string> ClassifyObjectWithColorSensorAsync()
+    { 
+        var response = (await robotService.ReadColorSensorData());
+        await ThrowIfInvalidResponse(response);
+        if (!ValidResponse(response) || response.Data!.Lux > _options.ColorSensor.LuxThreshold)
+        {
+            await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR, "Color sensor error!");
+            if (ValidResponse(response) && response.Data!.Lux > _options.ColorSensor.LuxThreshold)
+            {
+                await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP, "Reduce light to proceed!");
+            }
+
+            while (!ValidResponse(response) || response.Data!.Lux > _options.ColorSensor.LuxThreshold)
+            {
+                response = await robotService.ReadColorSensorData();
+                await ThrowIfInvalidResponse(response);
+            }
+        }
+        // logger.LogInformation(response.Data!.Lux.ToString());
+        var objectName = _colorSensorInterpreter.ColorFind(new Point(response.Data!.Red, response.Data.Green,
+            response.Data.Blue));
         return objectName;
     }
+
+    private async Task ThrowIfInvalidResponse(ModbusResponse response)
+    {
+        if (response.DeviceStatus != 0)
+        {
+            if(response.DeviceStatus == 1)
+                await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR, "Color sensor fail!");
+            else if (response.DeviceStatus == 2)
+                await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR,"Depth sensor fail!");
+            else if (response.DeviceStatus == 3)
+                await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR,"Color and Depth sensor fail!");
+            throw new DeviceErrorException();
+        }
+        await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_OK, "All systems are up!");
+    }
+    
+    // private async Task ThrowIfInvalidResponse<T>(ModbusResponse<T> response) where T : IModbusDeserializable<T>
+    // {
+    //     
+    // }
+    
 }

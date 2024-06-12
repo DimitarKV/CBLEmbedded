@@ -78,4 +78,9 @@ public class RobotService : IRobotService
     {
         return await _modbusConnector.ReadModbusMessageAsync(new ReadStatusMessage());
     }
+
+    public async Task<ModbusResponse> SetLedStatesAsync(SetLedStatesMessage message)
+    {
+        return await _modbusConnector.SendModbusMessageAsync(message);
+    }
 }

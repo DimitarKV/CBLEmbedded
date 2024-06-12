@@ -16,4 +16,6 @@ public interface IRobotService
     Task<ModbusResponse<ReadDepthSensorMessage>> ReadDepthSensorMessage();
     Task<ModbusResponse> ToggleReportTimes();
     Task<ModbusResponse<ReadStatusMessage>> ReadStatusAsync();
+
+    Task<ModbusResponse> SetLedStatesAsync(SetLedStatesMessage message);
 }

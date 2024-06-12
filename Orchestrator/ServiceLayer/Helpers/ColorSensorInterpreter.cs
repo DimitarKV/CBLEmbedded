@@ -42,15 +42,15 @@ public class ColorSensorInterpreter
 {
     public List<Cylinder> ColorSpaces { get; set; } = new ()
     {
-        new Cylinder(new Point(1600, 2600, 2000),
+        new Cylinder(new Point(1500, 2444, 1611),
             new Point(2400, 3600, 2650),
-                250, "black_disc"),
+                1000, "black_disc"),
         new Cylinder(new Point(48000, 64800, 44000),
             new Point(66000, 66500, 61000),
             2500, "white_disc"),
         new Cylinder(new Point(0, 0, 0),
             new Point(3100, 3600, 3600),
-            400, "empty")
+            1000, "empty")
     };
 
     public void AddColorSpace(Cylinder cylinder)
