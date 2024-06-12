@@ -1,6 +1,5 @@
 #include "servo_controller.h"
 
-// Convert a given angle to pulsewidth/position of the servo.
 int ServoController::convertAngleToPosition(byte angle)
 {
     return (angle * (SERVOMAX - SERVOMIN) / 180.0f) + SERVOMIN;

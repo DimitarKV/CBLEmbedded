@@ -16,6 +16,10 @@ private:
     bool readingInProgress = false;
     Adafruit_VL6180X vl = Adafruit_VL6180X();
 public:
+/**
+ * Determines the behavior of the depth sensor.
+ * Receives data and converts it in the needed form for the project. 
+ */
     // DepthSensor();
     bool init();
     bool status_check();

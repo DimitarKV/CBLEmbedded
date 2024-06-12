@@ -14,6 +14,12 @@
 #include <Adafruit_ST7789.h>
 #include <Adafruit_GFX.h>
 
+/**
+ * Manages various devices connected to the ESP-32, including a Modbus connector,
+ * a display, a color sensor, a servo controller, a motor driver, and a depth sensor. It initializes and 
+ * coordinates these components to handle Modbus communication, perform sensor readings, control servos, 
+ * and operate a motor.
+ */
 
 #define STEPPER_IN1 5
 #define STEPPER_IN2 6

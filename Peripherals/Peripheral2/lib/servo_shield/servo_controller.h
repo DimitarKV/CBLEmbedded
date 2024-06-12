@@ -20,6 +20,11 @@ class ServoController : public ErrorProneDevice {
         bool inverse[16] = {false};
         bool locked = false;
     public:
+/**
+ * Manages multiple servos using the PCA9685 PWM driver.
+ * It provides methods to initialize the controller, add and configure servos, 
+ * set angles immediately, and control servo progression.
+ */ 
         bool init();
         bool status_check();
         void lockOff(bool lock = true);

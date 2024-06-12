@@ -13,6 +13,10 @@ protected:
     int _identifier;
     bool _locked = false;
 public:
+/**
+ * Defines the basic functionality of the devices.
+ * Makes sure that the peripheral devices work properly.
+ */
     virtual bool init();
     virtual bool status_check();
     virtual void tick();
