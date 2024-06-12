@@ -11,8 +11,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.AspNetCore">
-      </Reference>
+      <PackageReference Include="NetCoreAudio" Version="2.0.0" />
     </ItemGroup>
-
 </Project>

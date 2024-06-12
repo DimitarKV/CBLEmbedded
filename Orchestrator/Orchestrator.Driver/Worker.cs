@@ -5,15 +5,15 @@ using Orchestrator.Driver.Config.ColorSensor;
 using Orchestrator.Driver.Exceptions;
 using ServiceLayer.Helpers;
 using ServiceLayer.Services;
+using ServiceLayer.Services.Implementation;
 using ServiceLayer.Types;
 
 namespace Orchestrator.Driver;
 
-public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfiguration configuration) : BackgroundService
+public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfiguration configuration, IRobotSoundService robotSoundService) : BackgroundService
 {
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
-
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
     private readonly List<int> weights = new() { 30, 30, 30 };
     public bool AllGood { get; set; } = true;
@@ -21,14 +21,13 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
     public string SimpleMessage { get; set; } = "";
     public string CurrentOperation { get; set; } = "";
     
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         
         // await Task.Delay(500);
         await LightAllLights(false);
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
-        // Play initialization sound
+        robotSoundService.PlaySound(_options.Audio["StartingSound"]);
         while (!stoppingToken.IsCancellationRequested)
         {
             try

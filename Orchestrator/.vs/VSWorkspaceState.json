@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\ServiceLayer",
+    "\\ServiceLayer\\Services",
+    "\\ServiceLayer\\Services\\Implementation"
+  ],
+  "SelectedNode": "\\ServiceLayer\\Services\\Implementation\\RobotService.cs",
+  "PreviewInSolutionExplorer": false
+}
