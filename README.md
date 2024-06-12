@@ -9,10 +9,10 @@ A robot that simulates an unloading baggage-handling system in airports. In part
 - In the *Orchestrator* folder there are:
   - the Modbus Connector which creates another layer of abstraction over the Serial protocol used by both ends - ESP-32 and RaspberryPI;
   - the Driver which implements the whole logic of the robot using commands in the service layer;
-  - the Portal which
+  - the Portal which collects and preserves the measurements in csv files for later usage in our data model.
   - the Robot SeviceLayer which creates application specific implementation over Modbus;
   - the Simulation transfer server
-- In the *Peripherals* folder there is implementation of functionality of the hardware divices, used in the robot:
+- In the *Peripherals* folder there is implementation of functionality of the hardware devices, used in the robot:
   -  the Color sensor determines the behavior of the color sensor. Receives data and converts it in the needed form for the project;
   -  the Modbus connector handles Modbus communication over the serial connection. It includes methods for reading, decoding, processing, and responding to Modbus commands;
   -  the Depth sensor determines the behavior of the depth sensor. Receives data and converts it in the needed form for the project;
