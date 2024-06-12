@@ -1,5 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+        <Exec Command="echo &quot;App Offline&quot; /a &gt; &quot;$(ProjectDir)app_offline.htm&quot;" />
+    </Target>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="del &quot;$(ProjectDir)app_offline.htm&quot;" />
+    </Target>
+    
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>

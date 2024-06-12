@@ -40,16 +40,16 @@ public record Cylinder(Point A, Point B, int Radius, string ClassificationName);
 
 public class ColorSensorInterpreter
 {
-    public List<Cylinder> ColorSpaces { get; set; } = new ()
+    public List<Cylinder> ColorSpaces { get; set; } = new ()    
     {
         new Cylinder(new Point(1500, 2444, 1611),
             new Point(2400, 3600, 2650),
                 1000, "black_disc"),
-        new Cylinder(new Point(48000, 64800, 44000),
-            new Point(66000, 66500, 61000),
+        new Cylinder(new Point(46000, 64800, 42000),
+            new Point(66000, 66000, 66000),
             2500, "white_disc"),
         new Cylinder(new Point(0, 0, 0),
-            new Point(3100, 3600, 3600),
+            new Point(4000, 4000, 5000),
             1000, "empty")
     };
 
