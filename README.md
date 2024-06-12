@@ -23,6 +23,3 @@ A robot that simulates an unloading baggage-handling system in airports. In part
   -  the Main manages various devices connected to the ESP-32.
 - In the *Printing* folder there are 3D files of different holders for the hardware devices
 - In the *Simulation* folder there is an exe file which contains the built simulation of the robot and all work files for the simulation created in Unity.
-
-## Prerequisite
-
