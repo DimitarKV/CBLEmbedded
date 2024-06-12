@@ -17,6 +17,8 @@ public class ConveyorBelt : MonoBehaviour
 
     void Update()
     {
+        //GetComponent<MeshRenderer>().material.mainTextureOffset += new Vector2(1, 0) * speed * Time.deltaTime;
+
         foreach (var item in onBelt)
         {
             //item.GetComponent<Rigidbody>().velocity = direction * speed * Time.deltaTime;

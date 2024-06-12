@@ -49,10 +49,12 @@ public class ObjectHandling : MonoBehaviour
         if (other.CompareTag("White"))
         {
             handledWeight = 10;
+            textField.text = "10 kg baggage";
         } 
         else if (other.CompareTag("Black"))
         {
             handledWeight = 20;
+            textField.text = "20 kg baggage";
         }
         else if (other.CompareTag("Trash"))
         {
