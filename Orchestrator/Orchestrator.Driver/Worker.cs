@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Modbus.Types;
 using Modbus.Types.Interfaces;
 using Orchestrator.Driver.Config;
@@ -15,11 +16,13 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
-    private readonly List<int> weights = new() { 30, 30, 30 };
+    private readonly List<int> weights = new() { 0, 0, 0 };
     public bool AllGood { get; set; } = true;
     public string StatusMessage { get; set; } = "";
     public string SimpleMessage { get; set; } = "";
     public string CurrentOperation { get; set; } = "";
+    public DateTime ObjectAwaitStartTime { get; set; }
+    
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -27,20 +30,26 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         // await Task.Delay(500);
         await LightAllLights(false);
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
-        robotSoundService.PlaySound(_options.Audio["StartingSound"]);
+        await robotSoundService.PlaySound(_options.Audio["StartingSound"]);
+        await DisplayBinWeights();
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP,
-                    "B3:" + weights[2] + " " + "B2:" + weights[1] + " " + "B1:" + weights[0]);
                 await OpenBarrierAsync(false);
                 await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = true });
                 await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Awaiting object!");
+                ObjectAwaitStartTime = DateTime.Now;
                 while (!await ObjectAtBarrierAsync())
                 {
-                    await Task.Delay(100, stoppingToken);
+                    if (DateTime.Now.Subtract(ObjectAwaitStartTime).Seconds >= 30)
+                    {
+                        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Belt probably not moving!");
+                    }
+                    await Task.Delay(250, stoppingToken);
                 }
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "");
+
                 await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
                 await robotService.MoveBelt(new MoveBeltMessage()
                     { Distance = _options.BarrierAdjustmentDistance }); //by 20mm
@@ -57,8 +66,8 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
-        await OpenBarrierAsync();
+        robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
+        OpenBarrierAsync();
     }
 
     // private static int counter = 0;
@@ -112,13 +121,16 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
             await PushAsync(minimalWeight - 1);
             weights[minimalWeight - 1] += weight;
             await DisplayBinsOnLeds();
+            await DisplayBinWeights();
         }
         else
         {
+            await robotSoundService.PlaySound(_options.Audio["EmptySound"]);
             await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Bins full, please empty and press Enter!");
             await LightAllLights();
             Console.ReadLine(); // After this point we expect the bins to be empty.
             await LightAllLights(false);
+            
             for (int i = 0; i < weights.Count; i++)
             {
                 weights[i] = 0;
@@ -218,7 +230,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task ThrowToTrash()
     {
-        await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP, "Moving foreign object to trash!");
+        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Moving foreign object to trash!");
         await MoveBeltAsync(_options.ColorSensorToTrashDistance);
     }
     
@@ -344,10 +356,17 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         return objectName;
     }
 
+    private async Task DisplayBinWeights()
+    {
+        await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP,
+            "B3:" + weights[2] + " " + "B2:" + weights[1] + " " + "B1:" + weights[0]);
+    }
+
     private async Task ThrowIfInvalidResponse(ModbusResponse response)
     {
         if (response.DeviceStatus != 0)
         {
+            await robotSoundService.PlaySound(_options.Audio["ErrorSound"]);
             if(response.DeviceStatus == 1)
                 await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR, "Color sensor fail!");
             else if (response.DeviceStatus == 2)
