@@ -12,7 +12,8 @@ private:
     uint16_t _colorFailure = 0xf800;
     uint16_t _colorWarning = 0xfc67;
     uint16_t _colorCoolBg = 0x8dff;
-    uint16_t _colorMessageBg= 0xc79a;
+    uint16_t _colorMessageBg = 0xc79a;
+    uint16_t _colorOrangeBG = 0xc79a;
     bool logMode = false;
 public:
     Display(int cs, int dc, int rst) : _tft(cs, dc, rst) {
@@ -49,7 +50,7 @@ public:
         int textLength = strlen(message);
         int cursorX = x1 + padding;
         int cursorY = y1 + padding;
-        _tft.fillRect(x1, y1, x2, textSize * 8 + 2 * padding, _colorCoolBg);
+        _tft.fillRect(x1, y1, x2, y2, _colorCoolBg);
 
         for (int i = 0; i < textLength; i++)
         {
@@ -63,16 +64,14 @@ public:
 
                 cursorX = x1 + padding;
                 cursorY += textSize * 8;
-                _tft.fillRect(x1, cursorY, x2, textSize * 8, _colorCoolBg);
-                _tft.setCursor(cursorX, cursorY);
-                _tft.print(message[i]);
+                i--;
             }
         }
         
     }
 
     void writeCurrentOperation(char* message) {
-        uint16_t textBg = _colorCoolBg;
+        uint16_t textBg = _colorOrangeBG;
         _tft.setTextColor(0);
         _tft.setTextWrap(true);
         writeWithWrapToCanvas(message, 2, 4, 0, 20, 240, 95);
