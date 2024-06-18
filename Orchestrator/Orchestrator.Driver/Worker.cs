@@ -246,7 +246,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task ThrowToTrash()
     {
-        await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP, "Moving foreign object to trash!");
+        await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Moving foreign object to trash!");
         await PlaySound(_options.Audio["ErrorSound"]);
         await MoveBeltAsync(_options.ColorSensorToTrashDistance);
     }
@@ -358,7 +358,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
             await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR, "Color sensor error!");
             if (ValidResponse(response) && response.Data!.Lux > _options.ColorSensor.LuxThreshold)
             {
-                await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP, "Reduce light to proceed!");
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Reduce light to proceed!");
             }
 
             while (!ValidResponse(response) || response.Data!.Lux > _options.ColorSensor.LuxThreshold)
