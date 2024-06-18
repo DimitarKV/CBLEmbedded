@@ -58,7 +58,7 @@ public class ObjectHandling : MonoBehaviour
         }
         else if (other.CompareTag("Trash"))
         {
-            textField.text = "Baggage not for this flight";
+            textField.text = "Moving foreign object to trash!";
         }
 
         if (Container2.weight2 + handledWeight > 40
@@ -66,7 +66,7 @@ public class ObjectHandling : MonoBehaviour
             && Container3.weight3 + handledWeight > 40)
         {
             empty.Play();
-            textField.text = "Containers full. Empty!";
+            textField.text = "Bins full, please empty and press Reset!";
         }
     }
     private void OnTriggerExit(Collider other)
