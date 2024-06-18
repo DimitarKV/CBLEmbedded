@@ -1,6 +1,5 @@
 #include "servo_controller.h"
 
-// Convert a given angle to pulsewidth/position of the servo.
 int ServoController::convertAngleToPosition(byte angle)
 {
     return (angle * (SERVOMAX - SERVOMIN) / 180.0f) + SERVOMIN;
@@ -50,7 +49,7 @@ void ServoController::setServoProgression(byte servonum, byte value)
 
     setImmediateAngle(servonum, angle);
 
-    Serial1.println(angle);
+    //Serial1.println(angle);
 }
 
 void ServoController::setImmediateAngles(byte *message, int length)

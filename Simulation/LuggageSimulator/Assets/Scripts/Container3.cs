@@ -32,17 +32,20 @@ public class Container3 : MonoBehaviour
         if (other.CompareTag("White"))
         {
             weight3 += 10;
+            ObjectHandling.handledWeight = 0;
         }
         else if (other.CompareTag("Black"))
         {
             weight3 += 20;
+            ObjectHandling.handledWeight = 0;
         }
         Debug.Log("Weight 3 = " + weight3);
 
-        if (weight3 == 40 && Container1.weight1 == 40 && Container1.weight1 == 40)
+        if (weight3 == 40 && Container2.weight2 == 40 && Container1.weight1 == 40)
         {
             textField.text = "Containers full. Empty!";
             empty.Play();
         }
+
     }
 }

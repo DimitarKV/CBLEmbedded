@@ -21,7 +21,6 @@ public class RobotSoundService() : IRobotSoundService
                 await _player.Play(sound);
                 await tcs.Task;
                 await _player.Stop();
-                await Task.Delay(100);
             }
             catch (Exception ex)
             {

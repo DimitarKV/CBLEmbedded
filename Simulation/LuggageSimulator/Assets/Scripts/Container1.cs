@@ -33,10 +33,12 @@ public class Container1 : MonoBehaviour
         if (other.CompareTag("White"))
         {
             weight1 += 10;
+            ObjectHandling.handledWeight = 0;
         }
         else if (other.CompareTag("Black"))
         {
             weight1 += 20;
+            ObjectHandling.handledWeight = 0;
         }
         Debug.Log("Weight 1 = " + weight1);
 

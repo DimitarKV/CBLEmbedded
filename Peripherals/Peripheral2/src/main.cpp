@@ -9,10 +9,17 @@
 #include <../lib/servo_shield/servo_controller.h>
 #include <../lib/motor_driver/motor_driver.h>
 #include <../lib/depth_sensor/depth_sensor.h>
+#include <../lib/led_driver/led_driver.h>
 
 #include <Adafruit_ST7789.h>
 #include <Adafruit_GFX.h>
 
+/**
+ * Manages various devices connected to the ESP-32, including a Modbus connector,
+ * a display, a color sensor, a servo controller, a motor driver, and a depth sensor. It initializes and 
+ * coordinates these components to handle Modbus communication, perform sensor readings, control servos, 
+ * and operate a motor.
+ */
 
 #define STEPPER_IN1 5
 #define STEPPER_IN2 6
@@ -25,6 +32,7 @@ ColorSensor colorSensor = ColorSensor(21, 1);
 ServoController servoController = ServoController();
 MotorDriver motorDriver(STEPPER_IN1, STEPPER_IN3, STEPPER_IN2, STEPPER_IN4);
 DepthSensor depthSensor;
+LedDriver ledDriver;
 bool devicesLocked = false;
 
 TaskHandle_t HandleConnectorTaskHandle;
@@ -39,7 +47,6 @@ void HandleConnector(void *parameter)
 
 void writeToDisplay(ModbusPacket inputPacket)
 {
-  Serial1.println((char*)inputPacket.data);
   display.interpretMessage((char *)inputPacket.data);
 }
 
@@ -101,6 +108,15 @@ void checkStatus(ModbusPacket packet) {
   connector.sendData((byte*)&devicesLocked, 1);
 }
 
+void setLedLevel(ModbusPacket packet) {
+  byte states = packet.data[0];
+  Serial1.println(states);
+  for (int i = 0; i < 8; i++)
+  {
+    ledDriver.setLedOn(i, (states >> i) & 1);
+  }
+}
+
 void lockDevices() {
   colorSensor.lock();
   depthSensor.lock();
@@ -127,6 +143,13 @@ void setup()
   motorDriver.init();
   servoController.init();
   depthSensor.init();
+  ledDriver.init();
+
+  for (int i = 0; i < 8; i++)
+  {
+    ledDriver.setLedOn(i, false);
+  }
+  
 
   servoController.addServo(0, 100, 50);
   servoController.addServo(1, 170, 10);
@@ -143,6 +166,7 @@ void setup()
   connector.addProcessor(7, *moveBeltContinuous);
   connector.addProcessor(8, *moveBeltSteps);
   connector.addProcessor(9, *isMotorMoving);
+  connector.addProcessor(10, *setLedLevel);
 
   xTaskCreatePinnedToCore(
       HandleConnector,

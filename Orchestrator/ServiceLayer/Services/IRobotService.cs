@@ -3,6 +3,9 @@ using ServiceLayer.Types;
 
 namespace ServiceLayer.Services;
 
+/// <summary>
+/// Creates application specific implementation over Modbus.
+/// </summary>
 public interface IRobotService
 {
     Task<ModbusResponse> WriteToDisplay(WriteToDisplayMessage message);
@@ -16,4 +19,6 @@ public interface IRobotService
     Task<ModbusResponse<ReadDepthSensorMessage>> ReadDepthSensorMessage();
     Task<ModbusResponse> ToggleReportTimes();
     Task<ModbusResponse<ReadStatusMessage>> ReadStatusAsync();
+
+    Task<ModbusResponse> SetLedStatesAsync(SetLedStatesMessage message);
 }

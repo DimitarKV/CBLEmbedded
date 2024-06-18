@@ -43,6 +43,10 @@ private:
     void printHex(byte value);
     void sendModbusResponsePart();
 public:
+/**
+ * Handles Modbus communication over a serial connection.
+ * It includes methods for reading, decoding, processing, and responding to Modbus commands.
+ */
     byte deviceStatus = 0;    
     void init();
     void tick();
