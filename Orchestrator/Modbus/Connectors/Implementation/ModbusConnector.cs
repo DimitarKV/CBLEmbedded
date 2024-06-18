@@ -147,7 +147,8 @@ public class ModbusConnector : PortConnector, IModbusConnector
             catch (TimeoutException e)
             {
                 _logger.LogError("ACK packet receive timed out, retrying!");
-                _logger.LogError("Received: " + ack);
+                _logger.LogInformation("Sent: " + data);
+                _logger.LogInformation("Received: " + ack);
                 continue;
             }
             finally
@@ -175,6 +176,7 @@ public class ModbusConnector : PortConnector, IModbusConnector
                 }
             }
             _logger.LogError("ACK packet receive unsuccessful, retrying!");
+            _logger.LogInformation("Sent: " + data);
             _logger.LogError("Received: " + ack);
 
         }

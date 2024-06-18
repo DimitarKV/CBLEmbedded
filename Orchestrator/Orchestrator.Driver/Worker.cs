@@ -39,7 +39,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         await LightAllLights(false);
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
         await PlaySound(_options.Audio["StartingSound"]);
-        await Task.Delay(1500);
+        await Task.Delay(1500, stoppingToken);
         await DisplayBinWeights();
         while (!stoppingToken.IsCancellationRequested)
         {
