@@ -60,7 +60,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
                     }
                     await Task.Delay(250, stoppingToken);
                 }
-                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "");
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object at barrier!");
 
                 await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
                 await robotService.MoveBelt(new MoveBeltMessage()
