@@ -14,5 +14,7 @@ builder.Services.AddTransient<Player>();
 builder.Services.AddSingleton<IRobotSoundService, RobotSoundService>();
 builder.Services.Configure<SerialPortOptions>(builder.Configuration.GetSection(SerialPortOptions.SerialPort));
 
+
+
 var host = builder.Build();
 host.Run();
