@@ -21,6 +21,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
+
     private readonly List<int> weights = new() { 0, 0, 0 };
     public bool AllGood { get; set; } = true;
     public string StatusMessage { get; set; } = "";
@@ -59,7 +60,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
                     }
                     await Task.Delay(250, stoppingToken);
                 }
-                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "");
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object at barrier!");
 
                 await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
                 await robotService.MoveBelt(new MoveBeltMessage()
@@ -122,6 +123,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         else if (objectName == "empty")
         {
             await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object possibly taken from belt!");
+
             await PlaySound(_options.Audio["ErrorSound"]);
             await Task.Delay(1500);
             return;
@@ -244,8 +246,8 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
 
     private async Task ThrowToTrash()
     {
-        await PlaySound(_options.Audio["ErrorSound"]);
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Moving foreign object to trash!");
+        await PlaySound(_options.Audio["ErrorSound"]);
         await MoveBeltAsync(_options.ColorSensorToTrashDistance);
     }
     
@@ -356,7 +358,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
             await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR, "Color sensor error!");
             if (ValidResponse(response) && response.Data!.Lux > _options.ColorSensor.LuxThreshold)
             {
-                await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP, "Reduce light to proceed!");
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Reduce light to proceed!");
             }
 
             while (!ValidResponse(response) || response.Data!.Lux > _options.ColorSensor.LuxThreshold)
