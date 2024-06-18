@@ -193,4 +193,5 @@ void loop()
   
   colorSensor.tick();
   depthSensor.tick();
+  Serial1.println("0");
 }

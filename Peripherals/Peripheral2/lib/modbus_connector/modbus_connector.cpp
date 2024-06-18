@@ -40,7 +40,7 @@ byte ModbusConnector::calculateLRCFromHex(char *buffer, int length)
 
 bool ModbusConnector::serialRead()
 {
-    if (Serial.available())
+    while (Serial.available())
     {
         serialBuffer[serialBufferIndex] = Serial.read();
         if (serialBuffer[serialBufferIndex] == ':')
