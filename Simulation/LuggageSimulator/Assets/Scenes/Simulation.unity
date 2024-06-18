@@ -8779,7 +8779,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Hello world! It's Mark!
+  m_Text: Starting up!
 --- !u!222 &290188663
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -8971,7 +8971,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &384944439
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10850,11 +10850,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3029048eaa064624085ebab54323aa49, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  percentages:
+  - 0.425
+  - 0.425
+  - 0.05
+  - 0.05
+  - 0.05
   diskPrefabs:
   - {fileID: 7467496471225172721, guid: 4efaed07327d5b643b677ee795edc9c2, type: 3}
   - {fileID: 4112518489316824859, guid: ca9931f84437f7044b0f5427460d09e4, type: 3}
-  - {fileID: 3174280483338386129, guid: 9dca6ec9fe61b6c4ab43818327156b98, type: 3}
+  - {fileID: 7467496471225172721, guid: a69b3a59f46663944a032bc22d499c15, type: 3}
   - {fileID: 8041101517714133142, guid: 78c8adc21f74da44d98c904c8fb78f3d, type: 3}
+  - {fileID: 7467496471225172721, guid: 3a156f4c2ed0e6944a3fd5ab3a711e42, type: 3}
 --- !u!4 &1001990222
 Transform:
   m_ObjectHideFlags: 0
@@ -19570,6 +19577,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8c5e402fc100ac43a464964997e24d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  conveyor: {fileID: 1342005076}
 --- !u!1 &1382192203
 GameObject:
   m_ObjectHideFlags: 0
@@ -19588,7 +19596,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1382192204
 BoxCollider:
   m_ObjectHideFlags: 0

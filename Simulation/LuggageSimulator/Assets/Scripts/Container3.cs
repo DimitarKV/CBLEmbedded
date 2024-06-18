@@ -23,7 +23,7 @@ public class Container3 : MonoBehaviour
             && Container1.weight1 + ObjectHandling.handledWeight > 40)
         {
             led3.range = 1;
-            textField.text = "Containers full. Empty!";
+            textField.text = "Bins full, please empty and press Reset!";
         }
     }
     private void OnTriggerEnter(Collider other)
@@ -43,7 +43,7 @@ public class Container3 : MonoBehaviour
 
         if (weight3 == 40 && Container2.weight2 == 40 && Container1.weight1 == 40)
         {
-            textField.text = "Containers full. Empty!";
+            textField.text = "Bins full, please empty and press Reset!";
             empty.Play();
         }
 
