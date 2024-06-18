@@ -47,7 +47,6 @@ void HandleConnector(void *parameter)
 
 void writeToDisplay(ModbusPacket inputPacket)
 {
-  //Serial1.println((char*)inputPacket.data);
   display.interpretMessage((char *)inputPacket.data);
 }
 

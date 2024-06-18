@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using System.Globalization;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Modbus.Types;
 using Modbus.Types.Interfaces;
 using Orchestrator.Driver.Config;
@@ -6,7 +9,6 @@ using Orchestrator.Driver.Config.ColorSensor;
 using Orchestrator.Driver.Exceptions;
 using ServiceLayer.Helpers;
 using ServiceLayer.Services;
-using ServiceLayer.Services.Implementation;
 using ServiceLayer.Types;
 
 namespace Orchestrator.Driver;
@@ -19,12 +21,15 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
     private readonly RobotVariablesOptions _options =
         configuration.GetSection(RobotVariablesOptions.RobotVariables).Get<RobotVariablesOptions>()!;
     private readonly ColorSensorInterpreter _colorSensorInterpreter = new();
+
     private readonly List<int> weights = new() { 0, 0, 0 };
     public bool AllGood { get; set; } = true;
     public string StatusMessage { get; set; } = "";
     public string SimpleMessage { get; set; } = "";
     public string CurrentOperation { get; set; } = "";
     public DateTime ObjectAwaitStartTime { get; set; }
+    public bool BeltMoveErrorSound { get; set; } = false;
+    public Task? SoundTask { get; set; } = null;
     
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -33,7 +38,8 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         // await Task.Delay(500);
         await LightAllLights(false);
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Starting up!");
-        await robotSoundService.PlaySound(_options.Audio["StartingSound"]);
+        await PlaySound(_options.Audio["StartingSound"]);
+        await Task.Delay(1500, stoppingToken);
         await DisplayBinWeights();
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -43,15 +49,18 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
                 await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = true });
                 await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Awaiting object!");
                 ObjectAwaitStartTime = DateTime.Now;
+                BeltMoveErrorSound = false;
                 while (!await ObjectAtBarrierAsync())
                 {
-                    if (DateTime.Now.Subtract(ObjectAwaitStartTime).Seconds >= 30)
+                    if (DateTime.Now.Subtract(ObjectAwaitStartTime).Seconds >= 15 && !BeltMoveErrorSound)
                     {
                         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Belt probably not moving!");
+                        await PlaySound(_options.Audio["ErrorSound"]);
+                        BeltMoveErrorSound = true;
                     }
                     await Task.Delay(250, stoppingToken);
                 }
-                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "");
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object at barrier!");
 
                 await robotService.MoveBelt(new MoveBeltContinuousMessage() { Running = false });
                 await robotService.MoveBelt(new MoveBeltMessage()
@@ -61,6 +70,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
             }
             catch (Exception e)
             {
+                logger.LogError(e.Message);
                 continue;
             }
             
@@ -113,7 +123,9 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         else if (objectName == "empty")
         {
             await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Object possibly taken from belt!");
-            await Task.Delay(3000);
+
+            await PlaySound(_options.Audio["ErrorSound"]);
+            await Task.Delay(1500);
             return;
         }
         
@@ -128,9 +140,10 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         }
         else
         {
-            await robotSoundService.PlaySound(_options.Audio["EmptySound"]);
-            await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Bins full, please empty and press Enter!");
             await LightAllLights();
+            await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Bins full, please empty and press Enter!");
+            await PlaySound(_options.Audio["EmptySound"]);
+            
             Console.ReadLine(); // After this point we expect the bins to be empty.
             await LightAllLights(false);
             
@@ -234,6 +247,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
     private async Task ThrowToTrash()
     {
         await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Moving foreign object to trash!");
+        await PlaySound(_options.Audio["ErrorSound"]);
         await MoveBeltAsync(_options.ColorSensorToTrashDistance);
     }
     
@@ -344,7 +358,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
             await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR, "Color sensor error!");
             if (ValidResponse(response) && response.Data!.Lux > _options.ColorSensor.LuxThreshold)
             {
-                await WriteToDisplay(DisplayMessageTypeEnum.CURRENT_OP, "Reduce light to proceed!");
+                await WriteToDisplay(DisplayMessageTypeEnum.MESSAGE, "Reduce light to proceed!");
             }
 
             while (!ValidResponse(response) || response.Data!.Lux > _options.ColorSensor.LuxThreshold)
@@ -356,6 +370,36 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         // logger.LogInformation(response.Data!.Lux.ToString());
         var objectName = _colorSensorInterpreter.ColorFind(new Point(response.Data!.Red, response.Data.Green,
             response.Data.Blue));
+        
+        
+
+        
+
+        // Append to the file.
+        var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            // Don't write the header again.
+            HasHeaderRecord = false,
+        };
+        using (var stream = File.Open("./CollectedData/bulk.csv", FileMode.Append))
+        using (var writer = new StreamWriter(stream))
+        using (var csv = new CsvWriter(writer, config))
+        {
+            await csv.WriteRecordsAsync(new List<ReadColorSensorMessage>() {response.Data});
+        }
+        
+        config = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            // Don't write the header again.
+            HasHeaderRecord = false,
+        };
+        using (var stream = File.Open("./CollectedData/classified.csv", FileMode.Append))
+        using (var writer = new StreamWriter(stream))
+        using (var csv = new CsvWriter(writer, config))
+        {
+            await csv.WriteRecordsAsync(new List<char>() {objectName[0]});
+        }
+        
         return objectName;
     }
 
@@ -369,7 +413,7 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
     {
         if (response.DeviceStatus != 0)
         {
-            await robotSoundService.PlaySound(_options.Audio["ErrorSound"]);
+            await PlaySound(_options.Audio["ErrorSound"]);
             if(response.DeviceStatus == 1)
                 await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_ERROR, "Color sensor fail!");
             else if (response.DeviceStatus == 2)
@@ -380,10 +424,11 @@ public class Worker(ILogger<Worker> logger, IRobotService robotService, IConfigu
         }
         await WriteToDisplay(DisplayMessageTypeEnum.STATUSS_OK, "All systems are up!");
     }
-    
-    // private async Task ThrowIfInvalidResponse<T>(ModbusResponse<T> response) where T : IModbusDeserializable<T>
-    // {
-    //     
-    // }
-    
+
+    private async Task PlaySound(string sound)
+    {
+        if (SoundTask is not null)
+            await SoundTask;
+        SoundTask = robotSoundService.PlaySound(sound);
+    }
 }

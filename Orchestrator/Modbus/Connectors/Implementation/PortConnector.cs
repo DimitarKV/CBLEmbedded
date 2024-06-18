@@ -19,7 +19,8 @@ public class PortConnector : SerialPort
     {
         Open();
         Write("aAbBcC\r\n");
-        // Thread.Sleep(1000);
+        Write("aAbBcC\r\n");
+        Task.Delay(1000).Wait();
         DiscardInBuffer();
     }
 

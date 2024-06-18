@@ -21,6 +21,7 @@ bool DepthSensor::status_check() {
 }
 
 void DepthSensor::tick(){
+    status_check();
     if(_status == NOT_RESPONDING) {
         init();
     } else if(!_locked) {

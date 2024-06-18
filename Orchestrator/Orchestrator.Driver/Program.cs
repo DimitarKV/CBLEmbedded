@@ -14,7 +14,7 @@ builder.Services.AddTransient<Player>();
 builder.Services.AddSingleton<IRobotSoundService, RobotSoundService>();
 builder.Services.Configure<SerialPortOptions>(builder.Configuration.GetSection(SerialPortOptions.SerialPort));
 
-Console.WriteLine(builder.Configuration.GetSection("RobotVariables:Motor:Speed").Value);
+
 
 var host = builder.Build();
 host.Run();
